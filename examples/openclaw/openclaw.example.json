@@ -1,0 +1,42 @@
+{
+  "gateway": {
+    "mode": "local",
+    "auth": { "mode": "token", "token": "YOUR_GATEWAY_TOKEN" }
+  },
+  "plugins": {
+    "entries": {
+      "nvidia": { "enabled": true },
+      "openai": { "enabled": true },
+      "active-memory": { "enabled": true },
+      "ollama": { "enabled": false }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "nvidia/qwen/qwen3-coder-480b-a35b-instruct",
+        "fallbacks": ["nvidia/moonshotai/kimi-k2-instruct"]
+      },
+      "compaction": { "reserveTokensFloor": 30000 }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "nvidia": {
+        "baseUrl": "https://integrate.api.nvidia.com/v1",
+        "apiKey": "YOUR_NVIDIA_API_KEY"
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "defaultAllowFrom": "YOUR_CREDENTIALS_DIR/telegram-default-allowFrom.json",
+      "groups": {
+        "YOUR_COUNCIL_GROUP_CHAT_ID": {
+          "requireMention": false
+        }
+      }
+    }
+  }
+}

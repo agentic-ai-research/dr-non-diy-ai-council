@@ -1,0 +1,40 @@
+# Credentials — never commit these
+*.pkl
+*.pkl.bak
+.env
+.env.local
+credentials/
+google-token*
+brain-state.json
+auth.json
+auth/
+
+# Bot runtime state
+sessions/
+logs/
+*.log
+state.db
+memories/
+gateway_state.json
+
+# Raw JSON configs with tokens (use .example.json instead)
+config.json
+openclaw.json
+*.json
+!examples/**/*.example.json
+!package.json
+!package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+.next/
+dist/
+
+# macOS
+.DS_Store

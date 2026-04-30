@@ -1,0 +1,45 @@
+{
+  "agents": {
+    "defaults": {
+      "workspace": "~/.nanobot/workspace",
+      "model": "nvidia_nim/mistralai/mistral-large-3-675b-instruct-2512",
+      "maxTokens": 4096,
+      "temperature": 0.7,
+      "maxToolIterations": 20
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "token": "YOUR_TELEGRAM_BOT_TOKEN",
+      "allowFrom": [
+        "YOUR_TELEGRAM_USER_ID",
+        "YOUR_COUNCIL_GROUP_CHAT_ID"
+      ],
+      "proxy": null
+    },
+    "whatsapp": { "enabled": false, "bridgeUrl": "ws://localhost:3001", "allowFrom": [] },
+    "feishu": { "enabled": false, "appId": "", "appSecret": "", "encryptKey": "", "verificationToken": "", "allowFrom": [] }
+  },
+  "providers": {
+    "openai": {
+      "apiKey": "YOUR_NVIDIA_API_KEY",
+      "apiBase": "https://integrate.api.nvidia.com/v1"
+    },
+    "anthropic": { "apiKey": "", "apiBase": null },
+    "openrouter": { "apiKey": "", "apiBase": null },
+    "deepseek": { "apiKey": "", "apiBase": null },
+    "groq": { "apiKey": "", "apiBase": null },
+    "zhipu": { "apiKey": "", "apiBase": null },
+    "vllm": { "apiKey": "", "apiBase": null },
+    "gemini": { "apiKey": "", "apiBase": null }
+  },
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 18793
+  },
+  "tools": {
+    "web": { "search": { "apiKey": "", "maxResults": 5 } },
+    "exec": { "timeout": 60, "restrictToWorkspace": false }
+  }
+}

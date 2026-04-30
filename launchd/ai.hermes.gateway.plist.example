@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ai.hermes.gateway</string>
+
+    <!-- Use a singleton wrapper to prevent multi-process Discord floods -->
+    <!-- See: https://github.com/your-repo/dr-non-diy-ai-council/docs/singleton-guard.md -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/YOUR_USERNAME/.hermes/start-hermes-singleton.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/YOUR_USERNAME/.hermes/hermes-agent</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/YOUR_USERNAME/.hermes/hermes-agent/venv/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+        <key>VIRTUAL_ENV</key>
+        <string>/Users/YOUR_USERNAME/.hermes/hermes-agent/venv</string>
+        <key>HERMES_HOME</key>
+        <string>/Users/YOUR_USERNAME/.hermes</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/YOUR_USERNAME/.hermes/logs/gateway.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/YOUR_USERNAME/.hermes/logs/gateway.error.log</string>
+</dict>
+</plist>
