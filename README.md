@@ -4,7 +4,7 @@
 
 # Dr Non's $0 DIY AI Council
 
-> Nine AI justices. One Telegram group. Running 24/7 on a Mac. Total cost: $0/month.
+> Ten AI justices. One Telegram group. Running 24/7 on a Mac. Total cost: ~$3/month (one Claude-backed bot, the rest free).
 
 ---
 
@@ -45,7 +45,7 @@ Where the systems diverge:
 | **Deployment** | Browser app, run manually | 24/7 launchd services on Mac |
 | **Cost** | Paid — OpenRouter credits | **$0** — NVIDIA NIM free + ThaiLLM free |
 | **Interface** | Web browser | Telegram group chat (mobile-native) |
-| **Personalities** | Model names only (GPT, Gemini, Claude...) | 9 named justices with distinct philosophy blends |
+| **Personalities** | Model names only (GPT, Gemini, Claude...) | 10 named justices with distinct philosophy blends |
 | **Cross-talk** | API routing | Shared `transcript.jsonl` — solves Telegram's bot-blindness |
 | **Deliberation** | Fixed 3-stage pipeline | 4 adaptive modes (VERIFY / DECIDE / EXPLORE / DEBATE) |
 | **Memory** | None — stateless | Living Brain RAG, decision log, prior-decision pre-read |
@@ -63,7 +63,7 @@ Other prior work worth reading: [MAD (ICLR 2025)](https://d2jud02ci9yv69.cloudfr
 
 ## The Court
 
-All nine justices have **palindrome names** — they read the same forwards and backwards. This is intentional. The council reflects back what you put in.
+All ten justices have **palindrome names** — they read the same forwards and backwards. This is intentional. The council reflects back what you put in.
 
 | Justice | Role | Archetype | Model | Capability |
 |---|---|---|---|---|
@@ -77,6 +77,7 @@ All nine justices have **palindrome names** — they read the same forwards and 
 | **Aviva** | Strategist | Mrs Hudson | Nemotron 49B | Long-view, pattern synthesis *(in progress)* |
 | **Bob** | Generalist | Lestrade | Nanobot-Mistral | Ground-level common sense — the "yeah but in practice..." voice |
 | **Pip** 🔧 | Utility Scribe | Dickensian junior | Mistral Small | QR codes · OCR · Peter's Drive · print-friendly PDFs · meeting notes |
+| **Eve** ⚙️ | Engineer / Builder | Karpathy | Claude Sonnet 4.5 | Reads vault git log + session archive + blackboard. Returns one of: `STATUS:` / `BUILD ESTIMATE:` / `BLOCKER:` / `PASS`. Grounds debate in shipped reality. Local-only. |
 
 **The Easter egg — noN.** One more bot. Three personalities: *noN* (silent observer, speaks when it counts), *NoN* (bold — Mark Manson mode), *Non* (mirrors Dr Non himself). Doesn't deliberate. Interrupts once per session, when the room needs it.
 
