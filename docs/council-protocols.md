@@ -10,17 +10,18 @@ The goal is not to have nine bots answer the same question — that's chaos. The
 
 ---
 
-## Two Modes the Chair Picks Between
+## Three Modes the Chair Picks Between
 
-The Chair (Tenet) does not deliberate on every inbound. Most inbounds are tasks, not judgment calls. Before any other rule in this doc applies, Tenet picks one of three routes.
+The Chair (Tenet) does not deliberate on every inbound. Most inbounds are tasks, not judgment calls. Before any other rule in this doc applies, Tenet picks one of four routes.
 
 ```
-ROUTE: TRIVIAL   → one specialist's lane. Answer or hand off in one line.
-ROUTE: WORKFLOW  → multiple specialists each return a different kind of fact. Fan out, fan in, ship.
-ROUTE: JUDGMENT  → values trade-off or genuine disagreement expected. Convene the council.
+ROUTE: TRIVIAL    → one specialist's lane. Answer or hand off in one line.
+ROUTE: WORKFLOW   → multiple specialists each return a different kind of fact. One pass.
+ROUTE: PRODUCTION → multi-pass assembly line. WIP cycles through stations until shipped.
+ROUTE: JUDGMENT   → values trade-off or genuine disagreement expected. Convene the council.
 ```
 
-The heuristic: if three specialists could each contribute a different kind of **fact**, it is WORKFLOW. If three specialists would each have a different kind of **opinion**, it is JUDGMENT. If only one specialist has anything to add, it is TRIVIAL.
+The heuristic: one specialist's lane is TRIVIAL. Many specialists, one pass, mechanical synthesis is WORKFLOW. Many specialists, multiple passes, output of one stage feeds the next is PRODUCTION. Values trade-off or expected disagreement is JUDGMENT.
 
 ### Workflow mode — the new default for tasks
 
@@ -37,6 +38,10 @@ FAN-IN:    tenet
 ```
 
 Time budget: **under 2 minutes from inbound to pin.** Thinking justices do not take Round 1 turns in workflow mode — only the named reviewers speak after `FAN-IN:`.
+
+### Production mode — the assembly line
+
+When the inbound needs more than one pass through the specialists — output of one stage reveals what the next stage must do — Tenet declares `MODE: PRODUCTION  LINE: <name>` and the WIP flows through stations. The 2-turn silence cap is suspended for whichever justice's station is currently active; an andon cord rule lets any justice stop the line. Full grammar, the per-bot adaptive skills palette, and a worked example are in [production-mode.md](production-mode.md).
 
 ### Judgment mode — the council deliberates
 
