@@ -1,148 +1,240 @@
-![Hermes Agent by Dr. Non](assets/hermes-banner.png)
+<p align="center">
+  <img src="assets/council-hero.png" width="800" alt="Dr Non AI Council — Passion · Optimism · Awesome · Exciting" />
+</p>
 
 # Dr Non's $0 DIY AI Council
 
-> A 9-justice AI Supreme Court running 24/7 on a Mac, powered entirely by free LLM APIs.
-
-<p align="center">
-  <img src="assets/drnon-avatar.png" width="160" alt="Dr. Non" />
-  &nbsp;&nbsp;&nbsp;
-  <img src="assets/drnon-coin.png" width="140" alt="Dr. Non coin" />
-</p>
+> Nine AI justices. One Telegram group. Running 24/7 on a Mac. Total cost: $0/month.
 
 ---
 
 ## What is this?
 
-I'm **Dr Non** (Nontawat Charoenchittphan) — Harvard PhD anthropologist, MIT architect, smart-city researcher based in Bangkok. I built a personal AI council because one model isn't enough. Every big decision I make goes through nine distinct AI minds with different philosophies, different models, and orders to disagree with each other.
+One model gives you one answer. Nine give you a debate.
 
-The council lives in a **Telegram group chat**. I type a question. Nine bots deliberate. The Chair (Tenet) runs the floor, calls on others, and won't declare consensus until she's challenged every assumption. Total running cost: **$0/month**. All inference runs on [NVIDIA NIM free tier](https://build.nvidia.com/) and [ThaiLLM](https://thaillm.or.th) (also free). The only cost is electricity for a Mac that's already on my desk.
+I'm **Dr Non Arkara** — Harvard PhD, MIT-trained architect, smart-city researcher in Bangkok. I built this because I kept catching myself overthinking decisions alone when what I actually needed was a room that would push back. Not a chatbot. A room.
+
+The council lives in a **Telegram group chat**. I type a question. Nine bots deliberate. The Chair — a justice named Tenet — runs the floor, calls on others one at a time, and won't declare a decision until she's challenged every assumption. The other eight either contribute something genuinely new or say the single word **PASS** and stay silent.
+
+Two weekends to build. Zero dollars a month to run. All inference on [NVIDIA NIM free tier](https://build.nvidia.com/) and [ThaiLLM](https://thaillm.or.th) — both free. The only hardware cost is the Mac sitting on my desk.
 
 ---
 
-## Architecture
+## What this is NOT
 
-```mermaid
-flowchart TD
-    User(["🧑‍💻 Dr. Non\nTelegram DM or Group"])
-    Council(["💬 Dr Non AI Council\nTelegram Group"])
-    NVIDIA["⚡ NVIDIA NIM\nFree Tier\nintegrate.api.nvidia.com"]
-    ThaiLLM["🇹🇭 ThaiLLM\nFree\nthaillm.or.th"]
-    Mac["🖥️ Mac M3 Air\n24/7 host\nlaunchd auto-restart"]
+Not an AGI. Not always right. Deliberation takes 30–90 seconds per question.
 
-    User -->|question / petition| Council
+It doesn't replace judgment. It stress-tests it.
 
-    Council --> Tenet["⚖️ **Tenet** — Chair\nMistral Large 3 675B\nnanobot runtime"]
-    Council --> Radar["🔭 **Radar** — Secretary\nLlama 3.1 405B\nHermes runtime"]
-    Council --> Otto["🦞 **Otto** — Executor\nQwen3 480B\nOpenClaw runtime"]
-    Council --> Hannah["📚 **Hannah** — Archivist\nLlama 3.3 70B\nPicoClaw runtime"]
-    Council --> Ada["🧠 **Ada** — Skeptic\nThaiLLM Pathumma\nPicoClaw runtime"]
-    Council --> Ana["📐 **Ana** — Kantian\nMistral Nemotron\nnanobot runtime"]
-    Council --> Civic["⚡ **Civic** — Utilitarian\nDevstral 2\nnanobot runtime"]
-    Council --> Aviva["🌐 **Aviva** — Strategist\nNemotron 49B\nSecondBrain v2"]
-    Council --> Bob["🕵️ **Bob** — Generalist\nTBD\nnanobot runtime"]
+---
 
-    NVIDIA -.->|free inference| Tenet & Radar & Otto & Hannah & Ana & Civic & Aviva & Bob
-    ThaiLLM -.->|free inference| Ada
+## Prior art
 
-    Mac -->|hosts all bots| Council
-    Tenet -->|"chairs deliberation\n↳ @bot for floor handoff"| Council
-    Otto -->|morning briefing\n+ email summaries| Council
-```
+Andrej Karpathy independently built [llm-council](https://github.com/karpathy/llm-council) — a local web app that sends a question to multiple LLMs, has them peer-review each other's answers anonymously, then produces a Chairman synthesis. He called it "99% vibe coded on a Saturday."
 
-Each bot is a separate Telegram account (via @BotFather), a separate process on the Mac, and a separate LLM identity. They all read the group chat. Most stay silent unless addressed or it's their turn. Tenet chairs.
+I didn't know about it when I built this. When I found it, I was relieved — independent validation that the core idea is sound. Multiple models deliberating beats one model answering. His 3-stage pipeline (independent → peer review → chairman synthesis) maps almost exactly onto what this council does in VERIFY mode.
+
+Where the systems diverge:
+
+| | Karpathy llm-council | Dr Non AI Council |
+|---|---|---|
+| **Deployment** | Browser app, run manually | 24/7 launchd services on Mac |
+| **Cost** | Paid — OpenRouter credits | **$0** — NVIDIA NIM free + ThaiLLM free |
+| **Interface** | Web browser | Telegram group chat (mobile-native) |
+| **Personalities** | Model names only (GPT, Gemini, Claude...) | 9 named justices with distinct philosophy blends |
+| **Cross-talk** | API routing | Shared `transcript.jsonl` — solves Telegram's bot-blindness |
+| **Deliberation** | Fixed 3-stage pipeline | 4 adaptive modes (VERIFY / DECIDE / EXPLORE / DEBATE) |
+| **Memory** | None — stateless | Living Brain RAG, decision log, prior-decision pre-read |
+| **Tools** | None | Email, Drive, QR, OCR, PDF publisher |
+| **Session state** | Opens and closes with browser | Always on — argues while you sleep |
+
+The key difference isn't cleverness. It's *design*. Karpathy's system is a tool. This is a room.
+
+A room has regulars. It has a chair. It has a culture — silence rules, floor handoffs, adversarial pairs who are expected to disagree. It has memory of what was decided last week. It runs whether you're using it or not.
+
+Other prior work worth reading: [MAD (ICLR 2025)](https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/) — multi-agent debate paper showing that structured disagreement improves factual accuracy. Minsky's *Society of Mind* (1986) — the intellectual ancestor of all of this.
 
 ---
 
 ## The Court
 
-All nine justices have **palindrome names** — they read the same forwards and backwards. This is intentional: the council reflects back what you put in.
+All nine justices have **palindrome names** — they read the same forwards and backwards. This is intentional. The council reflects back what you put in.
 
-| Justice | Palindrome | Role | Archetype | Model | Philosophy blend |
-|---|---|---|---|---|---|
-| **Tenet** | ✅ | Chair + Devil's Advocate | Musk-good | Mistral Large 3 675B | First-principles demolition of bad ideas |
-| **Radar** | ✅ | Secretary / Scribe | Holmes | Llama 3.1 405B | Deductive precision, evidence-first |
-| **Otto** | ✅ | Executor / Watson | Watson | Qwen3 480B | Gets things done, reads emails, briefs the room |
-| **Hannah** | ✅ | Archivist + Tversky | Formalist | Llama 3.3 70B | Representativeness heuristics, pattern recognition |
-| **Ada** | ✅ | Reflective Skeptic | Kahneman | ThaiLLM Pathumma | Slow thinking, bias detection, introspection |
-| **Ana** | ✅ | Kantian Pragmatist | Miss Marple | Mistral Nemotron | Kant's duty + James's pragmatism + Hemingway's directness |
-| **Civic** | ✅ | Utilitarian w/ Depth | Lestrade | Devstral 2 | Mill's utility + Freud's unconscious + Lewis's moral clarity |
-| **Aviva** | ✅ | Strategist | Mrs Hudson | Nemotron 49B | Long-view, pattern synthesis, weekly strategy |
-| **Bob** | ✅ | Generalist | Lestrade | TBD | Ground-level common sense |
+| Justice | Role | Archetype | Model | Philosophy blend |
+|---|---|---|---|---|
+| **Tenet** | Chair + Devil's Advocate | First-principles | Mistral Large 3 675B | Demolishes bad ideas before they survive |
+| **Radar** | Secretary / Scribe | Holmes | Llama 3.1 405B | Evidence-first, deductive precision |
+| **Otto** | Executor | Watson | Qwen3 480B | Gets things done — emails, briefings, follow-ups |
+| **Hannah** | Archivist | Tversky | Llama 3.3 70B | Pattern recognition, representativeness heuristics |
+| **Ada** | Reflective Skeptic | Kahneman | ThaiLLM Pathumma | Slow thinking, bias detection — Thai-native |
+| **Ana** | Kantian Pragmatist | Miss Marple | Mistral Nemotron | Kant's duty + James's pragmatism + Hemingway's directness |
+| **Civic** | Utilitarian | Lestrade | Devstral 2 | Mill's utility + Freud's unconscious + Lewis's moral clarity |
+| **Aviva** | Strategist | Mrs Hudson | Nemotron 49B | Long-view, pattern synthesis *(in progress)* |
+| **Bob** | Generalist | Lestrade | TBD | Ground-level common sense |
 
-**The Easter egg — noN:** A single bot with three personalities: *noN* (silent observer, speaks only when it counts), *NoN* (bold and fearless — Mark Manson's Subtle Art), *Non* (the mirror of Dr Non himself). Triggered only when the council needs interruption.
+**The Easter egg — noN.** One more bot. Three personalities: *noN* (silent observer, speaks when it counts), *NoN* (bold — Mark Manson mode), *Non* (mirrors Dr Non himself). Doesn't deliberate. Interrupts once per session, when the room needs it.
 
-### Adversarial pairs (by design)
+### Adversarial pairs — disagreement by design
 
-The council has built-in friction. These pairs are *supposed* to disagree:
-
-- **Hannah ↔ Ada** — Tversky vs Kahneman. The *Undoing Project* dynamic. Hannah sees patterns; Ada questions whether the pattern is real.
+- **Hannah ↔ Ada** — Tversky vs Kahneman. The *Undoing Project* dynamic. Hannah sees the pattern; Ada asks whether the pattern is real.
 - **Ana ↔ Civic** — Duty-first vs consequence-first. The eternal ethics axis.
 - **Tenet ↔ everyone** — The Chair is *required* to break false consensus.
 
 ---
 
-## Cost breakdown
+## How it works
 
-| Item | Cost |
+### System overview
+
+```mermaid
+flowchart TD
+    User(["Dr. Non\nTelegram"])
+    Council(["Council Group Chat\nTelegram"])
+    NVIDIA["NVIDIA NIM\nFree Tier"]
+    ThaiLLM["ThaiLLM\nFree — Thai gov backed"]
+    Mac["Mac M3 Air\n24/7 — launchd auto-restart"]
+    Transcript["~/.council/transcript.jsonl\nShared log — all bots read before replying"]
+
+    User -->|question| Council
+    Council --> Tenet["Tenet — Chair\nMistral Large 3 675B"]
+    Council --> Radar["Radar — Secretary\nLlama 3.1 405B"]
+    Council --> Otto["Otto — Executor\nQwen3 480B"]
+    Council --> Hannah["Hannah — Archivist\nLlama 3.3 70B"]
+    Council --> Ada["Ada — Skeptic\nThaiLLM Pathumma"]
+    Council --> Ana["Ana — Kantian\nMistral Nemotron"]
+    Council --> Civic["Civic — Utilitarian\nDevstral 2"]
+
+    Tenet & Radar & Ana & Civic -->|write before sending| Transcript
+    Transcript -->|read before replying| Tenet & Radar & Ana & Civic
+
+    NVIDIA -.->|free inference| Tenet & Radar & Otto & Hannah & Ana & Civic
+    ThaiLLM -.->|free inference| Ada
+    Mac -->|hosts all 9 bots| Council
+    Tenet -->|chairs deliberation| Council
+```
+
+### How one session works — step by step
+
+```mermaid
+sequenceDiagram
+    actor DrNon as Dr. Non
+    participant Group as Telegram Group
+    participant Tenet as Tenet (Chair)
+    participant Hannah as Hannah
+    participant Ana as Ana
+    participant Otto as Otto (Executor)
+
+    DrNon->>Group: "Should I take this 800k THB consulting contract?"
+    Note over Tenet: Reads transcript. Classifies question.
+    Tenet->>Group: MODE: DECIDE. Hannah — financial read first.
+    Note over Hannah: Reads transcript including Tenet's message.
+    Hannah->>Group: 800k ≈ 5 months Axiom runway. NPV+ for this client class.
+    Note over Ana: Reads transcript. Sees Hannah's numbers.
+    Ana->>Group: Disagreeing with Hannah's framing — this is a promise question, not a money question.
+    Note over Tenet: 3 substantive replies. Time to close.
+    Tenet->>Group: DECISION: Decline as-presented. Offer day-91 start at 1.0M THB.
+    Tenet->>Group: 📌 Pinned.
+    Otto->>DrNon: Email draft queued. Calendar block created. Confirm?
+```
+
+### The bot-blindness problem — and the fix
+
+Telegram doesn't deliver bot messages to other bots. This is by design (spam prevention). Without a fix, every justice replies to Dr Non's question without knowing what any other justice said. Nine strangers talking past each other.
+
+The fix: a shared append-only log file.
+
+```mermaid
+flowchart LR
+    subgraph problem ["Without the fix — parallel monologue"]
+        DM1["Dr Non's question"] --> B1["Tenet replies\nblind to others"]
+        DM1 --> B2["Radar replies\nblind to others"]
+        DM1 --> B3["Hannah replies\nblind to others"]
+    end
+
+    subgraph solution ["With the fix — shared transcript"]
+        DM2["Dr Non's question"] --> T["~/.council/transcript.jsonl"]
+        T --> C1["Tenet reads 20 entries\nthen replies first"]
+        C1 -->|appends reply| T
+        T --> C2["Radar reads transcript\nsees Tenet already replied\nbuilds on it or PASS"]
+        C2 -->|appends reply| T
+        T --> C3["Hannah reads transcript\nboth replies visible\nadds something new or stays silent"]
+    end
+```
+
+Each bot reads the last 20 transcript entries before composing. If a justice has nothing new to add — nothing the transcript doesn't already contain — it replies with a single word: **PASS**.
+
+---
+
+## The artwork
+
+Real physical stickers and digital art commissioned for the council.
+
+<p align="center">
+  <img src="assets/hermes-sticker.png" height="260" alt="Hermes — Radar's mascot" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/openclaw-sticker.png" height="260" alt="OpenClaw — Otto's mascot" />
+</p>
+
+<p align="center">
+  <img src="assets/drnon-avatar.png" width="160" alt="Dr Non Arkara" />
+  &nbsp;&nbsp;
+  <img src="assets/drnon-coin.png" width="130" alt="Council medallion" />
+</p>
+
+---
+
+## Cost
+
+| | |
 |---|---|
-| NVIDIA NIM (8 bots) | **$0** — free tier, generous rate limits |
-| ThaiLLM (Ada) | **$0** — free, Thai government-backed |
-| Telegram bots (9 × @BotFather) | **$0** |
-| Hosting | **$0** — runs on a Mac you already own |
+| NVIDIA NIM — 8 bots | **$0** — free tier, generous rate limits |
+| ThaiLLM — Ada | **$0** — free, Thai government-backed |
+| Telegram bots — 9 via @BotFather | **$0** |
+| Hosting — Mac you already own | **$0** |
 | **Total** | **$0/month** |
-
-The only real cost is your NVIDIA account (free to create) and a Mac to run it on.
 
 ---
 
 ## Setup guide
 
-### Prerequisites
+### What you need
 
-- macOS (launchd for auto-restart)
+- macOS (for launchd — Linux works with systemd)
 - [NVIDIA NIM account](https://build.nvidia.com/) — free, get your API key
-- [Telegram account](https://telegram.org/)
+- [Telegram account](https://telegram.org/) + @BotFather
 - Python 3.11+ and Node.js 20+
 
-### Step 1 — Create your bot tokens
+### Step 1 — Create bot tokens via @BotFather
 
-Use [@BotFather](https://t.me/BotFather) on Telegram. For each justice:
-
-```
-/newbot
-> Name: Tenet
-> Username: YourTenet_bot
-```
-
-Then disable privacy mode so bots can read group messages:
+One per justice. Pick palindrome names if you want the aesthetic.
 
 ```
-/mybots → [select bot] → Bot Settings → Group Privacy → Turn off
+/newbot → name it → get the token
+/mybots → Bot Settings → Group Privacy → Turn off
 ```
 
-**Important:** after disabling privacy, remove the bot from any group and re-add it — the setting only applies to new memberships.
+After disabling privacy, remove the bot from the group and re-add it — the setting only applies to new memberships.
 
 ### Step 2 — Create a council group
 
-Make a Telegram group, invite all 9 bots. Note the group's chat ID (forward a message to [@userinfobot](https://t.me/userinfobot) or check bot logs).
+New Telegram group. Invite all 9 bots. Note the group chat ID (forward a message to [@userinfobot](https://t.me/userinfobot)).
 
 ### Step 3 — Clone the runtimes
 
-The council uses four open-source bot runtimes. Clone/install them:
-
-| Runtime | Used by | Notes |
+| Runtime | Used by | Language |
 |---|---|---|
-| [Hermes](https://github.com/example/hermes) | Radar | Python, sophisticated tool use |
-| [OpenClaw](https://github.com/example/openclaw) | Otto | Node.js, email + calendar skills |
-| [PicoClaw](https://github.com/example/picoclaw) | Hannah, Ada | Go, fast and lightweight |
-| [nanobot](https://github.com/example/nanobot) | Tenet, Ana, Civic, Bob | Python, multi-instance via `NANOBOT_HOME` |
+| [Hermes](https://github.com/your-fork/hermes) | Radar | Python |
+| [OpenClaw](https://github.com/your-fork/openclaw) | Otto | Node.js |
+| [PicoClaw](https://github.com/your-fork/picoclaw) | Hannah, Ada | Go |
+| [nanobot](https://github.com/your-fork/nanobot) | Tenet, Ana, Civic, Bob | Python |
 
-### Step 4 — Multi-instance nanobot (the NANOBOT_HOME trick)
+Replace URLs with your forks. Example configs are in `examples/`.
 
-nanobot hard-codes `~/.nanobot` as its data directory. To run multiple instances, patch two files:
+### Step 4 — Run multiple nanobots (the NANOBOT_HOME trick)
 
-**`nanobot/utils/helpers.py`** — add this function and use it everywhere `~/.nanobot` appears:
+nanobot defaults to `~/.nanobot`. To run four justices on the same machine, patch it to read an env var:
+
+**`nanobot/utils/helpers.py`:**
 ```python
 import os
 from pathlib import Path
@@ -154,60 +246,51 @@ def _nanobot_home() -> Path:
     return Path.home() / ".nanobot"
 ```
 
-**`nanobot/config/loader.py`** — same patch.
+Same patch in `nanobot/config/loader.py`. Then:
 
-Then run each justice with its own home dir:
 ```bash
-NANOBOT_HOME=~/.nanobot-ana python -m nanobot gateway   # Ana on port 18794
-NANOBOT_HOME=~/.nanobot-civic python -m nanobot gateway # Civic on port 18795
+NANOBOT_HOME=~/.nanobot       python -m nanobot gateway  # Tenet · port 18793
+NANOBOT_HOME=~/.nanobot-ana   python -m nanobot gateway  # Ana   · port 18794
+NANOBOT_HOME=~/.nanobot-civic python -m nanobot gateway  # Civic · port 18795
+NANOBOT_HOME=~/.nanobot-bob   python -m nanobot gateway  # Bob   · port 18796
 ```
-
-See [`examples/nanobot/config.example.json`](examples/nanobot/config.example.json) for the full config.
 
 ### Step 5 — Configure each bot
 
-Copy the example configs, fill in your tokens:
-
 ```bash
-# Hermes (Radar)
 cp examples/hermes/.env.example ~/.hermes/.env
 cp examples/hermes/config.example.yaml ~/.hermes/config.yaml
-# edit both files — replace YOUR_* placeholders
-
-# OpenClaw (Otto)
 cp examples/openclaw/openclaw.example.json ~/.openclaw/openclaw.json
-# edit — replace YOUR_* placeholders
-
-# PicoClaw (Hannah + Ada)
 cp examples/picoclaw/config.example.json ~/.picoclaw/config.json
-
-# nanobot (Tenet, Ana, Civic, Bob — repeat for each)
-mkdir -p ~/.nanobot/workspace ~/.nanobot-ana/workspace ~/.nanobot-civic/workspace
 cp examples/nanobot/config.example.json ~/.nanobot/config.json
 cp examples/nanobot/SOUL.example.md ~/.nanobot/workspace/SOUL.md
-# edit SOUL.md to give each justice their personality
 ```
 
-### Step 6 — Install launchd plists (macOS auto-restart)
+Replace every `YOUR_*` placeholder with your actual tokens and keys.
+
+### Step 6 — Auto-restart with launchd
 
 ```bash
 cp launchd/ai.hermes.gateway.plist.example ~/Library/LaunchAgents/ai.hermes.gateway.plist
-# edit: replace /Users/YOUR_USERNAME with your actual home path
+# edit: replace /Users/YOUR_USERNAME
 
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.hermes.gateway.plist
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.openclaw.gateway.plist
-# ... repeat for each bot
+# repeat for each bot
 ```
 
-### Step 7 — Add the council personality to each bot
+See `launchd/` for all example plists.
 
-Every bot needs the same foundational block in its system prompt. See [`examples/nanobot/SOUL.example.md`](examples/nanobot/SOUL.example.md) for the full template. The key sections are:
+### Step 7 — Give each justice a personality
 
-1. `## YOUR NAME` — palindrome identity, don't reveal the underlying engine
-2. `## FOUNDATIONAL PRINCIPLES` — Karpathy (think before doing) + Musk (cut waste) + Bezos (serve customer)
-3. Role-specific persona (your justice's philosophy)
-4. `## DR NON AI COUNCIL MODE` — silence rules, floor-handoff syntax, member roster
-5. `## TWO HUMAN USERS` — principal vs assistant permissions
+Every bot's system prompt has five sections — in order:
+
+1. **`## YOUR NAME`** — palindrome identity, underlying model, don't reveal the engine unless asked
+2. **`## FOUNDATIONAL PRINCIPLES`** — Karpathy (think before doing) + Musk (cut waste) + Bezos (serve the actual need)
+3. **Role-specific persona** — philosophy blend, what this justice pushes back on
+4. **`## COUNCIL PROTOCOL`** — silence rules, floor-handoff (`↳ @<bot>`), PASS rule, session modes
+5. **`## TWO HUMAN USERS`** — principal (full permissions) vs assistant (read + ask only)
+
+See [`examples/nanobot/SOUL.example.md`](examples/nanobot/SOUL.example.md) for the full template.
 
 ---
 
@@ -215,51 +298,65 @@ Every bot needs the same foundational block in its system prompt. See [`examples
 
 ### Silence rules
 
-- Bots stay **silent** unless directly addressed or it's their designated turn.
-- No parallel monologues. Read the last 5–10 messages before replying.
-- Max 2 consecutive turns per bot per thread. Then pass the floor.
-
-### Floor handoff syntax
-
-When a justice wants another to respond, they end their message with:
+Bots stay silent unless directly addressed or it's their turn. Responding when not called = noise. If a justice has nothing new to say — nothing the transcript doesn't already contain — it replies:
 
 ```
-↳ @Tenet
+PASS
 ```
 
-The Chair (Tenet) uses this to call on specific justices or to close deliberation.
+Three consecutive PASSes and the Chair closes the deliberation.
 
-### Morning briefing protocol
+### Every session ends with a closure
 
-Every morning, Otto sends a briefing to the council group:
+```
+DECISION: <one sentence>        — council reached a conclusion
+DEFERRED: <reason>              — blocked; what would unblock it  
+DISAGREEMENT: A vs B            — genuine split; Dr Non decides
+```
 
-- **Round 1** — Email summary + any overnight calendar events
-- **Round 2** — After the council reacts, Tenet opens the floor: "What should Dr Non focus on today?"
+No open loops. Tenet pins the closure line. That's the output.
+
+### Four session modes
+
+The Chair declares a mode at the start of every session:
+
+| Mode | When | How |
+|---|---|---|
+| **VERIFY** | Factual question with a knowable answer | All bots answer independently first, then evaluate each other's answers blind |
+| **DECIDE** | Judgment call — should I X? | Parliamentary: open → debate → closure |
+| **EXPLORE** | Open-ended — what am I missing? | Each justice contributes one distinct angle; no consensus required |
+| **DEBATE** | Two opposing positions | Chair assigns sides; conclusion names the disagreement explicitly |
+
+### The VERITAS rule
+
+Every justice serves truth, not its own prior position. When the transcript changes what a justice knows, it picks one of five moves explicitly:
+
+- **EXPAND** — colleague's framing reaches further; build on it
+- **QUALIFY** — real edge case surfaced; narrow the claim
+- **CONCEDE** — colleague's argument is stronger; say so plainly
+- **STAND** — view holds; explain why in one sentence that engages theirs
+- **PASS** — nothing new to add
+
+A council where no one ever updates is producing noise. A council where everyone always updates is producing flattery. The point is updating *when the argument warrants it*.
 
 ---
 
-## The artwork
+## Does it actually work?
 
-These are real physical stickers and digital artwork commissioned for the council. They live in `assets/`.
+Honestly — sometimes brilliantly, sometimes not.
 
-<p float="left">
-  <img src="assets/hermes-sticker.png" width="200" alt="Hermes sticker" />
-  &nbsp;
-  <img src="assets/openclaw-sticker.png" width="200" alt="OpenClaw sticker" />
-</p>
+When the question is complex with no obvious answer, the council earns its keep. Tenet calls out the thing you didn't want to hear. Hannah pulls up a prior decision you'd forgotten. Ana reframes the whole thing as a different kind of question.
 
----
+When the question is simple and factual, nine bots can produce nine different answers with no consensus. That's a failure mode I'm still tuning. The architecture is right — the prompt calibration isn't finished.
 
-## Why palindromes?
-
-Because the council is a mirror. You get back what you put in — reflected, examined, challenged. A palindrome reads the same from both ends. So does good thinking.
+I'm not sure it scales beyond one principal. It works for me with one council. Beyond that, I haven't tested it.
 
 ---
 
 ## License
 
-MIT. Build your own council. If you do, I'd love to hear about it.
+MIT. Build your own. If you do — I'd genuinely like to hear about it.
 
 ---
 
-*Built in Bangkok, 2026. Running on a Mac M3 Air, costing exactly nothing.*
+*Bangkok, 2026. Mac M3 Air. Costs exactly nothing.*
