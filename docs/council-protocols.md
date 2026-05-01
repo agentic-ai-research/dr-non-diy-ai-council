@@ -1,10 +1,54 @@
 # Council Protocols
 
+> This doc governs **deliberation** — silence rules, floor handoffs, modes, adversarial pairs. For tool-using bots, inter-builder collaboration (Eve ↔ LOL), the LAN-shared transcript, and cybersecurity guardrails, see [inter-bot-protocols.md](inter-bot-protocols.md).
+
 ## The Basic Idea
 
 Dr Non types a question into the Telegram group. Nine bots are in the group. They deliberate. The Chair (Tenet) runs the floor.
 
 The goal is not to have nine bots answer the same question — that's chaos. The goal is structured disagreement that produces better decisions than any single bot.
+
+---
+
+## Two Modes the Chair Picks Between
+
+The Chair (Tenet) does not deliberate on every inbound. Most inbounds are tasks, not judgment calls. Before any other rule in this doc applies, Tenet picks one of three routes.
+
+```
+ROUTE: TRIVIAL   → one specialist's lane. Answer or hand off in one line.
+ROUTE: WORKFLOW  → multiple specialists each return a different kind of fact. Fan out, fan in, ship.
+ROUTE: JUDGMENT  → values trade-off or genuine disagreement expected. Convene the council.
+```
+
+The heuristic: if three specialists could each contribute a different kind of **fact**, it is WORKFLOW. If three specialists would each have a different kind of **opinion**, it is JUDGMENT. If only one specialist has anything to add, it is TRIVIAL.
+
+### Workflow mode — the new default for tasks
+
+Tenet decomposes the inbound into parallel asks, posts a `FAN-OUT:` block, and waits. When the returns are in (or the deadline hits), he posts a `FAN-IN:` synthesis. Reviewers — Ana, Civic, Aviva, Bob — are invoked **by name** on the `REVIEW:` line, not by Round 1 reflex. Each posts in ≤15s. Tenet pins.
+
+```
+ROUTE: WORKFLOW
+FAN-OUT:
+  - @hannah: pull last 6mo of similar decisions
+  - @radar:  fetch market signals
+  - @otto:   calendar bandwidth check
+DEADLINE: 60s
+FAN-IN:    tenet
+```
+
+Time budget: **under 2 minutes from inbound to pin.** Thinking justices do not take Round 1 turns in workflow mode — only the named reviewers speak after `FAN-IN:`.
+
+### Judgment mode — the council deliberates
+
+Tenet declares one of `MODE: VERIFY | DECIDE | EXPLORE | DEBATE` and runs Round 1 / Round 2 as defined in *Morning Briefing Protocol* below. This is the deliberation pattern the Court was built for. Use it when a workflow surfaces a values trade-off, when a decision is irreversible, or when reviewers in workflow mode genuinely disagree.
+
+### Build mode — delegate to the builders
+
+Engineering work skips the council. Tenet declares `MODE: BUILD` and hands the floor to Eve or LOL per [inter-bot-protocols.md](inter-bot-protocols.md). Thinking justices stay silent.
+
+### Where the full router lives
+
+The decision rubric, the `FAN-OUT:` / `FAN-IN:` grammar, specialist response shapes, and a worked end-to-end example are in [tenet-router.md](tenet-router.md). That file is drop-in ready for Tenet's SOUL.md.
 
 ---
 
