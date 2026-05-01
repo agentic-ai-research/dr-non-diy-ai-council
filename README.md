@@ -10,11 +10,15 @@
 
 ## What is this?
 
-One model gives you one answer. Nine give you a debate.
+One model gives you one answer. Nine give you a debate — and one of them will actually do the work.
 
-I'm **Dr Non Arkara** — Harvard PhD, MIT-trained architect, smart-city researcher in Bangkok. I built this because I kept catching myself overthinking decisions alone when what I actually needed was a room that would push back. Not a chatbot. A room.
+I'm **Dr Non Arkara** — Harvard PhD, MIT-trained architect, smart-city researcher in Bangkok. I built this because I needed two things at once: a room that would push back on my thinking, and an assistant who could handle real tasks without me switching apps.
 
-The council lives in a **Telegram group chat**. I type a question. Nine bots deliberate. The Chair — a justice named Tenet — runs the floor, calls on others one at a time, and won't declare a decision until she's challenged every assumption. The other eight either contribute something genuinely new or say the single word **PASS** and stay silent.
+The council lives in a **Telegram group chat**. I send a message. Nine bots deliberate. One of them — Otto, the Executor — has actual tool access: he OCRs business cards and saves them to Google Contacts, downloads videos from Instagram/YouTube/TikTok/LinkedIn/any platform, syncs files to Google Drive, and sends email drafts. The other eight think. Tenet chairs and pins decisions.
+
+Send a business card photo → contact saved to both Google accounts, automatically. Send an Instagram reel → MP4 in chat + copy in Drive. Ask "should I take this contract?" → structured deliberation, decision pinned, calendar block queued.
+
+Not a chatbot. Not a replication of Karpathy's llm-council. An **office** — thinkers, an executor, persistent memory about who you are, and MCP hooks so it learns from your Obsidian vault.
 
 Two weekends to build. Zero dollars a month to run. All inference on [NVIDIA NIM free tier](https://build.nvidia.com/) and [ThaiLLM](https://thaillm.or.th) — both free. The only hardware cost is the Mac sitting on my desk.
 
@@ -45,12 +49,13 @@ Where the systems diverge:
 | **Cross-talk** | API routing | Shared `transcript.jsonl` — solves Telegram's bot-blindness |
 | **Deliberation** | Fixed 3-stage pipeline | 4 adaptive modes (VERIFY / DECIDE / EXPLORE / DEBATE) |
 | **Memory** | None — stateless | Living Brain RAG, decision log, prior-decision pre-read |
-| **Tools** | None | Email, Drive, QR, OCR, PDF publisher |
-| **Session state** | Opens and closes with browser | Always on — argues while you sleep |
+| **Tool calls** | None | OCR business cards → Google Contacts, video download (1500+ sites), Drive sync, email drafts, PDF publisher, QR codes |
+| **Obsidian MCP** | None | MCP integration — teach the council what it should know from your vault |
+| **Session state** | Opens and closes with browser | Always on — arguments happen while you sleep |
 
-The key difference isn't cleverness. It's *design*. Karpathy's system is a tool. This is a room.
+The key difference isn't cleverness. It's *design*. Karpathy's system is a tool. This is a room with an executor.
 
-A room has regulars. It has a chair. It has a culture — silence rules, floor handoffs, adversarial pairs who are expected to disagree. It has memory of what was decided last week. It runs whether you're using it or not.
+A room has regulars. It has a chair. It has a culture — silence rules, floor handoffs, adversarial pairs expected to disagree. It has memory of what was decided last week. And it has one person whose job isn't to think — it's to act.
 
 Other prior work worth reading: [MAD (ICLR 2025)](https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/) — multi-agent debate paper showing that structured disagreement improves factual accuracy. Minsky's *Society of Mind* (1986) — the intellectual ancestor of all of this.
 
@@ -60,17 +65,18 @@ Other prior work worth reading: [MAD (ICLR 2025)](https://d2jud02ci9yv69.cloudfr
 
 All nine justices have **palindrome names** — they read the same forwards and backwards. This is intentional. The council reflects back what you put in.
 
-| Justice | Role | Archetype | Model | Philosophy blend |
+| Justice | Role | Archetype | Model | Capability |
 |---|---|---|---|---|
-| **Tenet** | Chair + Devil's Advocate | First-principles | Mistral Large 3 675B | Demolishes bad ideas before they survive |
-| **Radar** | Secretary / Scribe | Holmes | Llama 3.1 405B | Evidence-first, deductive precision |
-| **Otto** | Executor | Watson | Qwen3 480B | Gets things done — emails, briefings, follow-ups |
-| **Hannah** | Archivist | Tversky | Llama 3.3 70B | Pattern recognition, representativeness heuristics |
-| **Ada** | Reflective Skeptic | Kahneman | ThaiLLM Pathumma | Slow thinking, bias detection — Thai-native |
+| **Tenet** | Chair + Devil's Advocate | First-principles | Mistral Large 3 675B | Demolishes bad assumptions before they survive. Pins decisions. |
+| **Radar** | Secretary / Scribe | Holmes | Llama 3.1 405B | Web search, fetch, evidence-first deduction. The room's researcher. |
+| **Otto** 🔧 | Executor + Tool-bot | Watson | Qwen3 480B | **Business card OCR → Google Contacts · Video download from 1500+ platforms · Google Drive sync · Email drafts · PDF publisher · QR codes** |
+| **Hannah** | Archivist | Tversky + Mycroft | Llama 3.3 70B | Living Brain RAG — recalls prior decisions, pattern-matches history |
+| **Ada** | Reflective Skeptic | Kahneman | ThaiLLM Pathumma | Slow thinking, bias detection — **Thai-native LLM** |
 | **Ana** | Kantian Pragmatist | Miss Marple | Mistral Nemotron | Kant's duty + James's pragmatism + Hemingway's directness |
-| **Civic** | Utilitarian | Lestrade | Devstral 2 | Mill's utility + Freud's unconscious + Lewis's moral clarity |
+| **Civic** | Utilitarian | Civic | Devstral 2 | Mill's utility + Freud's unconscious + Lewis's storytelling |
 | **Aviva** | Strategist | Mrs Hudson | Nemotron 49B | Long-view, pattern synthesis *(in progress)* |
-| **Bob** | Generalist | Lestrade | TBD | Ground-level common sense |
+| **Bob** | Generalist | Lestrade | Nanobot-Mistral | Ground-level common sense — the "yeah but in practice..." voice |
+| **Pip** 🔧 | Utility Scribe | Dickensian junior | Mistral Small | QR codes · OCR · Peter's Drive · print-friendly PDFs · meeting notes |
 
 **The Easter egg — noN.** One more bot. Three personalities: *noN* (silent observer, speaks when it counts), *NoN* (bold — Mark Manson mode), *Non* (mirrors Dr Non himself). Doesn't deliberate. Interrupts once per session, when the room needs it.
 
@@ -167,18 +173,10 @@ Each bot reads the last 20 transcript entries before composing. If a justice has
 
 ## The artwork
 
-Real physical stickers and digital art commissioned for the council.
+Real physical stickers and digital art commissioned for the council members — each justice gets a sticker.
 
 <p align="center">
-  <img src="assets/hermes-sticker.png" height="260" alt="Hermes — Radar's mascot" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="assets/openclaw-sticker.png" height="260" alt="OpenClaw — Otto's mascot" />
-</p>
-
-<p align="center">
-  <img src="assets/drnon-avatar.png" width="160" alt="Dr Non Arkara" />
-  &nbsp;&nbsp;
-  <img src="assets/drnon-coin.png" width="130" alt="Council medallion" />
+  <img src="assets/council-sticker-workshop.png" width="800" alt="Dr Non AI Council — member stickers in production" />
 </p>
 
 ---
