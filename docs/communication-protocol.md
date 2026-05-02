@@ -60,6 +60,7 @@ Anything else is silence. Silence costs nothing; noise costs trust.
 
 This doc is the floor. Everything else is built on top:
 
+- [task-lifecycle.md](task-lifecycle.md) — **the spine.** UNDERSTANDING → DISTRIBUTION → EXECUTION. The three places threads succeed or fail; per-line FAN-OUT deadlines, the tool-call envelope, the reviewer triage table.
 - [transcript-fix.md](transcript-fix.md) — *why* the file-based fix exists and how each framework integrates.
 - [justice-roles.md](justice-roles.md) — what each justice is uniquely good at, and the specific tasks she should pull. The five constitutional principles. The "approach the bench" DM-escalation pattern.
 - [multi-task.md](multi-task.md) — concurrent threads, four task-class termination rules, standing orders for continuous work, public-account bench gates.

@@ -1,6 +1,8 @@
 # The Council Protocol Stack
 
-Twelve protocol docs. ~2,500 lines. The IP behind the council. Read top-down for orientation; jump to the right layer when you have a specific question.
+Thirteen protocol docs. ~2,800 lines. The IP behind the council. Read top-down for orientation; jump to the right layer when you have a specific question.
+
+> **The spine.** [task-lifecycle.md](task-lifecycle.md) is the single doc that names the operational pipeline (UNDERSTANDING → DISTRIBUTION → EXECUTION) and the three places threads succeed or fail. If you're orienting fast, read this one.
 
 ## Reading paths
 
@@ -8,7 +10,8 @@ Twelve protocol docs. ~2,500 lines. The IP behind the council. Read top-down for
 
 1. [README.md](../README.md) — project overview + the Manus comparison.
 2. [council-soul.md](council-soul.md) — the mindset every justice carries (Musk · Bezos · Norman · Pinker · 3 Cs · Flow).
-3. [justice-roles.md](justice-roles.md) — the bench, by framework strength.
+3. [task-lifecycle.md](task-lifecycle.md) — the operational spine: how a task moves from inbound to pin.
+4. [justice-roles.md](justice-roles.md) — the bench, by framework strength.
 
 ### "I'm writing a new bot."
 
@@ -41,6 +44,7 @@ Twelve protocol docs. ~2,500 lines. The IP behind the council. Read top-down for
 | Doc | Layer | What it answers |
 |---|---|---|
 | [council-soul.md](council-soul.md) | Mindset | *How does every justice **think**?* |
+| [task-lifecycle.md](task-lifecycle.md) | **Spine** | *How does a task move from inbound to pin? Where do threads fail?* |
 | [justice-roles.md](justice-roles.md) | Role | *Which justice does **what**?* |
 | [communication-protocol.md](communication-protocol.md) | Floor | *How does every justice **speak**?* |
 | [transcript-fix.md](transcript-fix.md) | Transport | *Why a file, not a Telegram channel?* |
