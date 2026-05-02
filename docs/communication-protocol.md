@@ -61,6 +61,7 @@ Anything else is silence. Silence costs nothing; noise costs trust.
 This doc is the floor. Everything else is built on top:
 
 - [transcript-fix.md](transcript-fix.md) — *why* the file-based fix exists and how each framework integrates.
+- [justice-roles.md](justice-roles.md) — what each justice is uniquely good at, and the specific tasks she should pull. The five constitutional principles. The "approach the bench" DM-escalation pattern.
 - [council-protocols.md](council-protocols.md) — deliberation rules: silence cap, floor handoffs, modes, adversarial pairs.
 - [inter-bot-protocols.md](inter-bot-protocols.md) — what tool-using justices may do, what they refuse, the five cybersecurity locks.
 - [production-mode.md](production-mode.md) — the assembly-line route and per-justice verb palettes.
