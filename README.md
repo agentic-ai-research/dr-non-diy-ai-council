@@ -24,6 +24,32 @@ Two weekends to build. Zero dollars a month to run. All inference on [NVIDIA NIM
 
 ---
 
+## Manus-class capability, at $0
+
+Manus.ai launched in March 2025 with $2B-class valuation discussion around their autonomous-agent thesis: a system that decomposes tasks, calls tools, and runs end-to-end without much human babysitting. Closed model, big infra, paid by token.
+
+This council reaches comparable autonomy on free-tier inference, runs on a Mac you already own, and ships its protocol stack as twelve markdown docs and ~600 lines of stdlib Python any team can fork. **The IP is the protocol stack** — see [docs/INDEX.md](docs/INDEX.md).
+
+| Dimension | Manus.ai-class | This Council |
+|---|---|---|
+| **Infra cost** | Pay-per-token, closed pricing | $0 — NVIDIA NIM free + ThaiLLM free + one Claude bot at ~$3/mo |
+| **Hardware** | Cloud GPUs | Mac (M3 Air + M5 Max, 128GB) |
+| **Transparency** | Closed weights, closed protocol | Fully open — protocol + reference code in this repo |
+| **Coordination** | Internal RPC | Single shared JSONL transcript + user-account Telethon relay |
+| **Termination rules** | Implicit | Four explicit task classes — `TRIVIAL` / `WORKFLOW` / `PRODUCTION` / `STANDING` / `JUDGMENT` |
+| **Reputation guard** | Implicit | `BENCH:` gate on every public-facing action; default `required-each` until graduated |
+| **Learning** | Fine-tuned weights (proprietary) | Per-bot exemplar libraries from pinned threads — runs in cron, no GPU |
+| **Failure mode** | Centralized — one outage takes the system down | Per-justice — file-based source of truth survives bot crashes |
+| **Setup** | SaaS signup + cloud config | `git clone` + drop launchd plists; eleven justices online in an evening |
+
+Honest gaps — what this is **not yet** at parity on: full browser automation, computer-use control of a sandboxed VM, fine-tuned tool-use weights. Those are the next milestones in [ROADMAP.md](ROADMAP.md).
+
+The pitch in one line: **eleven palindrome-named justices, four operating modes plus standing orders, four cybersecurity locks enforced by code or CI, an open-source Telethon relay for binary-only bot frameworks, and a `BENCH:` protocol that lets the council ask Dr Non for a private ruling without crowding the group.**
+
+If Manus opened the eyes, this opens the codebase.
+
+---
+
 ## What this is NOT
 
 Not an AGI. Not always right. Deliberation takes 30–90 seconds per question.
