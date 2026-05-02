@@ -28,6 +28,7 @@ openclaw.json
 !examples/**/*.example.json
 !package.json
 !package-lock.json
+!infra/*.json
 
 # Python
 __pycache__/

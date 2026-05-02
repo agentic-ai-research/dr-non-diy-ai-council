@@ -4,7 +4,7 @@
 
 # Dr Non's $0 DIY AI Council
 
-> Ten AI justices. One Telegram group. Running 24/7 on a Mac. Total cost: ~$3/month (one Claude-backed bot, the rest free).
+> Eleven AI justices. One Telegram group. Running 24/7 across two Macs. Total cost: ~$3/month (one Claude-backed bot, the rest free).
 
 ---
 
@@ -63,7 +63,7 @@ Other prior work worth reading: [MAD (ICLR 2025)](https://d2jud02ci9yv69.cloudfr
 
 ## The Court
 
-All ten justices have **palindrome names** — they read the same forwards and backwards. This is intentional. The council reflects back what you put in.
+All eleven justices have **palindrome names** — they read the same forwards and backwards. This is intentional. The council reflects back what you put in.
 
 | Justice | Role | Archetype | Model | Capability |
 |---|---|---|---|---|
@@ -78,6 +78,7 @@ All ten justices have **palindrome names** — they read the same forwards and b
 | **Bob** | Generalist | Lestrade | Nanobot-Mistral | Ground-level common sense — the "yeah but in practice..." voice |
 | **Pip** 🔧 | Utility Scribe | Dickensian junior | Mistral Small | QR codes · OCR · Peter's Drive · print-friendly PDFs · meeting notes |
 | **Eve** ⚙️ | Engineer / Builder | Karpathy | Claude Sonnet 4.5 | Reads vault git log + session archive + blackboard. Returns one of: `STATUS:` / `BUILD ESTIMATE:` / `BLOCKER:` / `PASS`. Grounds debate in shipped reality. Local-only. |
+| **LOL** ⚙️ | iOS Builder (Eve's twin) | Karpathy | Claude Sonnet 4.5 (M5 Max) | iOS-side counterpart to Eve. Owns Xcode / Swift / simulator on a separate MacBook Pro M5 Max (128GB RAM). Same four-format reply discipline plus `CONTRACT:` / `NEEDS-IOS:` / `NEEDS-BACKEND:` handoff verbs for cross-platform work. Shares `~/.council/transcript.jsonl` via Tailscale. |
 
 **The Easter egg — noN.** One more bot. Three personalities: *noN* (silent observer, speaks when it counts), *NoN* (bold — Mark Manson mode), *Non* (mirrors Dr Non himself). Doesn't deliberate. Interrupts once per session, when the room needs it.
 

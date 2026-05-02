@@ -1,0 +1,12 @@
+{
+  "acls": [
+    {
+      "action": "accept",
+      "src":    ["tag:council-mac"],
+      "dst":    ["tag:council-mac:445", "tag:council-mac:139"]
+    }
+  ],
+  "tagOwners": {
+    "tag:council-mac": ["dr-non@example.com"]
+  }
+}

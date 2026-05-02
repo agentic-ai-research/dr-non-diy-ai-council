@@ -1,0 +1,52 @@
+{
+  "_comment": "Reference schema. Copy to ~/.council/policy.json on the council Mac. Each bot's bot_id (key under 'bots') must match the COUNCIL_BOT_NAME set in its launchd plist. See README.md in this directory for context.",
+
+  "version": 1,
+
+  "bots": {
+    "tenet":  { "tools": ["telegram-send"] },
+    "hannah": { "tools": ["telegram-send"] },
+    "ada":    { "tools": ["telegram-send"] },
+    "ana":    { "tools": ["telegram-send"] },
+    "civic":  { "tools": ["telegram-send"] },
+    "aviva":  { "tools": ["telegram-send"] },
+    "bob":    { "tools": ["telegram-send"] },
+    "non":    { "tools": ["telegram-send"] },
+
+    "radar": {
+      "tools": ["telegram-send", "web-fetch", "fs-read"],
+      "constraints": { "web-fetch": "read-only" }
+    },
+
+    "otto": {
+      "tools": ["telegram-send", "web-fetch", "email", "calendar", "fs-read"],
+      "constraints": {
+        "web-fetch": "read-only",
+        "email":     { "max_recipients": 3, "no_mass": true }
+      }
+    },
+
+    "pip": {
+      "tools": ["telegram-send", "gdrive", "fs-read", "fs-write"],
+      "constraints": {
+        "fs-write": ["~/.pip/qr", "~/.pip/pdf", "~/.pip/ocr"]
+      }
+    },
+
+    "eve": {
+      "tools": ["telegram-send", "fs-read", "fs-write", "git-commit", "git-push", "shell-exec"],
+      "constraints": {
+        "git-push":   "feature-branch-only",
+        "shell-exec": ["git", "pytest", "npm", "bun"]
+      }
+    },
+
+    "lol": {
+      "tools": ["telegram-send", "fs-read", "fs-write", "git-commit", "git-push", "shell-exec", "xcodebuild", "simctl"],
+      "constraints": {
+        "git-push":   "feature-branch-only",
+        "shell-exec": ["git", "xcodebuild", "xcrun", "swift", "simctl"]
+      }
+    }
+  }
+}
