@@ -1,21 +1,29 @@
 {
-  "_comment": "Reference schema. Copy to ~/.council/policy.json on the council Mac. Each bot's bot_id (key under 'bots') must match the COUNCIL_BOT_NAME set in its launchd plist. See README.md in this directory for context.",
+  "_comment": "Reference schema. Copy to ~/.council/policy.json on the council Mac. Each bot's bot_id (key under 'bots') must match the COUNCIL_BOT_NAME set in its launchd plist. See README.md in this directory and docs/resilience.md for the failover semantics.",
+
+  "_endpoints_comment": "Each bot's 'endpoints' array defines Layer-1 provider failover (per docs/resilience.md). The harness walks the array on 401/429/timeout and stays on a fallback for 5 min before retrying primary. EVERY bot ends with a local Ollama fallback so the council never goes fully dark on a provider outage. Model IDs marked <verify-on-provider> need confirmation against the provider's current free-tier catalog — they shift over time.",
 
   "version": 1,
 
   "bots": {
-    "tenet":  { "tools": ["telegram-send"] },
-    "hannah": { "tools": ["telegram-send"] },
-    "ada":    { "tools": ["telegram-send"] },
-    "ana":    { "tools": ["telegram-send"] },
-    "civic":  { "tools": ["telegram-send"] },
-    "aviva":  { "tools": ["telegram-send"] },
-    "bob":    { "tools": ["telegram-send"] },
-    "non":    { "tools": ["telegram-send"] },
+    "tenet": {
+      "tools": ["telegram-send"],
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "mistralai/mistral-large-2-instruct",   "key_ref": "council-tenet-nim" },
+        { "provider": "openrouter",   "model": "mistralai/mistral-large",              "key_ref": "council-tenet-openrouter" },
+        { "provider": "ollama-local", "model": "mistral-large:latest",                 "host": "http://localhost:11434" }
+      ]
+    },
 
     "radar": {
       "tools": ["telegram-send", "web-fetch", "fs-read"],
-      "constraints": { "web-fetch": "read-only" }
+      "constraints": { "web-fetch": "read-only" },
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "meta/llama-3.1-405b-instruct",         "key_ref": "council-radar-nim" },
+        { "provider": "cerebras",     "model": "llama3.3-70b",                         "key_ref": "council-radar-cerebras" },
+        { "provider": "sambanova",    "model": "Meta-Llama-3.1-405B-Instruct",         "key_ref": "council-radar-sambanova" },
+        { "provider": "ollama-local", "model": "llama3.3:70b",                         "host": "http://localhost:11434" }
+      ]
     },
 
     "otto": {
@@ -24,12 +32,70 @@
         "web-fetch": "read-only",
         "email":     { "max_recipients": 3, "no_mass": true }
       },
-      "_comment_endpoints": "Layer-1 failover from docs/resilience.md. The harness walks this array on 401/429/timeout. Sticky for 5 min on a fallback before retrying primary.",
       "endpoints": [
-        { "provider": "nvidia-nim",   "model": "qwen3-480b",   "key_ref": "council-otto-nim" },
-        { "provider": "openrouter",   "model": "qwen-2.5-72b", "key_ref": "council-otto-openrouter" },
-        { "provider": "together",     "model": "qwen2.5-72b",  "key_ref": "council-otto-together" },
-        { "provider": "ollama-local", "model": "qwen2.5:72b",  "host": "http://localhost:11434" }
+        { "provider": "groq",         "model": "llama-3.3-70b-versatile",              "key_ref": "council-otto-groq" },
+        { "provider": "nvidia-nim",   "model": "qwen/qwen3-480b-a3b-instruct",         "key_ref": "council-otto-nim" },
+        { "provider": "cerebras",     "model": "llama3.3-70b",                         "key_ref": "council-otto-cerebras" },
+        { "provider": "openrouter",   "model": "qwen/qwen-2.5-72b-instruct",           "key_ref": "council-otto-openrouter" },
+        { "provider": "ollama-local", "model": "qwen2.5:72b",                          "host": "http://localhost:11434" }
+      ]
+    },
+
+    "hannah": {
+      "tools": ["telegram-send"],
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "meta/llama-3.3-70b-instruct",          "key_ref": "council-hannah-nim" },
+        { "provider": "sambanova",    "model": "Meta-Llama-3.3-70B-Instruct",          "key_ref": "council-hannah-sambanova" },
+        { "provider": "ollama-local", "model": "llama3.3:70b",                         "host": "http://localhost:11434" }
+      ]
+    },
+
+    "ada": {
+      "tools": ["telegram-send"],
+      "_provider_note": "Ada's primary is the Thai-native ThaiLLM (Pathumma). Fallbacks are general-purpose models that can handle Thai, ordered by quality.",
+      "endpoints": [
+        { "provider": "thaillm",      "model": "openthaigpt-1.5-7b-instruct",          "key_ref": "council-ada-thaillm" },
+        { "provider": "google-ai",    "model": "gemini-1.5-flash",                     "key_ref": "council-ada-gemini" },
+        { "provider": "nvidia-nim",   "model": "meta/llama-3.1-8b-instruct",           "key_ref": "council-ada-nim" },
+        { "provider": "ollama-local", "model": "llama3.1:8b",                          "host": "http://localhost:11434" }
+      ]
+    },
+
+    "ana": {
+      "tools": ["telegram-send"],
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "nvidia/llama-3.1-nemotron-70b-instruct","key_ref": "council-ana-nim" },
+        { "provider": "openrouter",   "model": "nvidia/llama-3.1-nemotron-70b-instruct","key_ref": "council-ana-openrouter" },
+        { "provider": "ollama-local", "model": "nemotron-mini:latest",                 "host": "http://localhost:11434" }
+      ]
+    },
+
+    "civic": {
+      "tools": ["telegram-send"],
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "mistralai/devstral-2507",              "key_ref": "council-civic-nim" },
+        { "provider": "openrouter",   "model": "mistralai/devstral-medium",            "key_ref": "council-civic-openrouter" },
+        { "provider": "ollama-local", "model": "mistral:latest",                       "host": "http://localhost:11434" }
+      ]
+    },
+
+    "aviva": {
+      "tools": ["telegram-send"],
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "nvidia/llama-3.1-nemotron-49b-instruct","key_ref": "council-aviva-nim" },
+        { "provider": "openrouter",   "model": "nvidia/llama-3.1-nemotron-70b-instruct","key_ref": "council-aviva-openrouter" },
+        { "provider": "ollama-local", "model": "nemotron-mini:latest",                 "host": "http://localhost:11434" }
+      ]
+    },
+
+    "bob": {
+      "tools": ["telegram-send"],
+      "_engine_note": "Upgraded 2026-05-02 — see commit 453df63. Bob is the mandatory reviewer; DeepSeek V3 (not R1) is the right shape: strong reasoning without R1's chain-of-thought overhead, which would slow the ≤15s sanity-check cadence.",
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "deepseek-ai/deepseek-v3",              "key_ref": "council-bob-nim" },
+        { "provider": "openrouter",   "model": "deepseek/deepseek-chat",               "key_ref": "council-bob-openrouter" },
+        { "provider": "groq",         "model": "deepseek-r1-distill-llama-70b",        "key_ref": "council-bob-groq" },
+        { "provider": "ollama-local", "model": "deepseek-v3:latest",                   "host": "http://localhost:11434" }
       ]
     },
 
@@ -37,7 +103,27 @@
       "tools": ["telegram-send", "gdrive", "fs-read", "fs-write"],
       "constraints": {
         "fs-write": ["~/.pip/qr", "~/.pip/pdf", "~/.pip/ocr"]
-      }
+      },
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "mistralai/mistral-small-instruct",     "key_ref": "council-pip-nim" },
+        { "provider": "mistral",      "model": "mistral-small-latest",                 "key_ref": "council-pip-mistral" },
+        { "provider": "ollama-local", "model": "mistral:7b",                           "host": "http://localhost:11434" }
+      ]
+    },
+
+    "nun": {
+      "tools": ["telegram-send", "web-fetch", "fs-read", "fs-write"],
+      "constraints": {
+        "web-fetch": "read-only",
+        "fs-write":  ["~/.council/synthesis"]
+      },
+      "_engine_note": "Nun's reasoning depth justifies R1's chain-of-thought. She's not a mandatory reviewer; latency is acceptable.",
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "deepseek-ai/deepseek-r1",              "key_ref": "council-nun-nim" },
+        { "provider": "openrouter",   "model": "deepseek/deepseek-r1",                 "key_ref": "council-nun-openrouter" },
+        { "provider": "groq",         "model": "deepseek-r1-distill-llama-70b",        "key_ref": "council-nun-groq" },
+        { "provider": "ollama-local", "model": "deepseek-r1:70b",                      "host": "http://localhost:11434" }
+      ]
     },
 
     "eve": {
@@ -45,7 +131,14 @@
       "constraints": {
         "git-push":   "feature-branch-only",
         "shell-exec": ["git", "pytest", "npm", "bun"]
-      }
+      },
+      "_paid_note": "Eve is the one paid bot — Claude Sonnet 4.5 via Anthropic API at ~$3/mo. The fallbacks are open-weight Claude-replacements; quality drops but the build doesn't stop.",
+      "endpoints": [
+        { "provider": "anthropic",    "model": "claude-sonnet-4-5-20250929",           "key_ref": "council-eve-anthropic" },
+        { "provider": "openrouter",   "model": "anthropic/claude-3.5-sonnet",          "key_ref": "council-eve-openrouter" },
+        { "provider": "together",     "model": "Qwen/Qwen2.5-Coder-32B-Instruct",      "key_ref": "council-eve-together" },
+        { "provider": "ollama-local", "model": "qwen2.5-coder:32b",                    "host": "http://localhost:11434" }
+      ]
     },
 
     "lol": {
@@ -53,7 +146,22 @@
       "constraints": {
         "git-push":   "feature-branch-only",
         "shell-exec": ["git", "xcodebuild", "xcrun", "swift", "simctl"]
-      }
+      },
+      "_paid_note": "LOL runs on the M5 Max with the same Claude Sonnet 4.5 pricing as Eve. The local Ollama fallback uses Qwen 2.5 Coder 32B — runs offline on the M5 Max's 128GB RAM with room to spare.",
+      "endpoints": [
+        { "provider": "anthropic",    "model": "claude-sonnet-4-5-20250929",           "key_ref": "council-lol-anthropic" },
+        { "provider": "openrouter",   "model": "anthropic/claude-3.5-sonnet",          "key_ref": "council-lol-openrouter" },
+        { "provider": "ollama-local", "model": "qwen2.5-coder:32b",                    "host": "http://localhost:11434" }
+      ]
+    },
+
+    "non": {
+      "tools": ["telegram-send"],
+      "_endpoints_note": "noN doesn't need an LLM endpoint for her primary work — she's a silent observer that writes the hourly digest from the transcript. Endpoint listed only for the rare wildcard interrupt (~once per session).",
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "mistralai/mistral-small-instruct",     "key_ref": "council-non-nim" },
+        { "provider": "ollama-local", "model": "mistral:7b",                           "host": "http://localhost:11434" }
+      ]
     }
   }
 }

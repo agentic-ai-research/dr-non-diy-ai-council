@@ -1,0 +1,31 @@
+{
+  "_comment": "Canonical Telegram-handle → justice map. The single source of truth for who answers as what. Both OpenClaw multi-agent dispatch and Hermes personalities config read from this file. Copy to ~/.council/handle-map.json and edit. Per-handle SOULs live at ../souls/ for the full set; per-handle/ in this directory shows canonical examples for the routing pattern.",
+
+  "version": 1,
+
+  "handles": {
+    "@NonTenet_bot":          { "justice": "Tenet",  "framework": "nanobot",          "soul_path": "~/.council/souls/Tenet.SOUL.md" },
+    "@NonRadar_bot":          { "justice": "Radar",  "framework": "hermes",           "soul_path": "~/.hermes/personalities/radar.SOUL.md" },
+    "@NonOtto_bot":           { "justice": "Otto",   "framework": "openclaw",         "soul_path": "~/.openclaw/agents/otto/SOUL.md" },
+    "@DrNonOpenClaw_bot":     { "justice": "Otter",  "framework": "openclaw",         "soul_path": "~/.openclaw/agents/otter/SOUL.md" },
+    "@DrNonOpenClaw2026_bot": { "justice": "Civic",  "framework": "openclaw",         "soul_path": "~/.openclaw/agents/civic/SOUL.md" },
+    "@NonHannah_bot":         { "justice": "Hannah", "framework": "picoclaw",         "soul_path": "~/.picoclaw/personalities/hannah.SOUL.md" },
+    "@NonAda_bot":            { "justice": "Ada",    "framework": "picoclaw",         "soul_path": "~/.picoclaw/personalities/ada.SOUL.md" },
+    "@NonAna_bot":            { "justice": "Ana",    "framework": "nanobot",          "soul_path": "~/.council/souls/Ana.SOUL.md" },
+    "@DrNonHermesV2_bot":     { "justice": "Aviva",  "framework": "hermes",           "soul_path": "~/.hermes/personalities/aviva.SOUL.md" },
+    "@NonBob_bot":            { "justice": "Bob",    "framework": "nanobot",          "soul_path": "~/.council/souls/Bob.SOUL.md" },
+    "@nonmind_bot":           { "justice": "Bob",    "framework": "nanobot",          "soul_path": "~/.council/souls/Bob.SOUL.md", "_note": "Bob's actual handle per Dr Non; @NonBob_bot listed above is the legacy alias." },
+    "@NonPip_bot":            { "justice": "Pip",    "framework": "picoclaw",         "soul_path": "~/.picoclaw/personalities/pip.SOUL.md" },
+    "@DrNonPip_bot":          { "justice": "Pip",    "framework": "picoclaw",         "soul_path": "~/.picoclaw/personalities/pip.SOUL.md", "_note": "alias for Pip" },
+    "@NonPicoClawV2_Bot":     { "justice": "Hannah", "framework": "picoclaw",         "soul_path": "~/.picoclaw/personalities/hannah.SOUL.md", "_note": "alias for Hannah" },
+    "@NonSecondBrain_Bot":    { "justice": "Aviva",  "framework": "secondbrain",      "soul_path": "~/.secondbrain/aviva.SOUL.md", "_note": "Aviva's strategist surface" },
+    "@NonEve_bot":            { "justice": "Eve",    "framework": "eve-coder",        "soul_path": "~/.eve/SOUL.md" },
+    "@NonLOL_bot":            { "justice": "LOL",    "framework": "eve-coder-ios",    "soul_path": "~/.eve/SOUL.md", "_note": "lives on the M5 Max, not this Mac" },
+    "@NonNoN_bot":            { "justice": "noN",    "framework": "noN-harness",      "soul_path": "~/.council/souls/noN.SOUL.md" }
+  },
+
+  "_legacy_aliases_to_resolve": [
+    "Several Telegram handles below are aliases of the same justice (e.g. @nonmind_bot and @NonBob_bot both → Bob). Pick one canonical handle per justice and retire the alias once the council is stable.",
+    "If a Telegram message arrives addressed to a handle not in this map, the framework gateway logs a warning and falls back to a 'who are you?' default — never assumes an identity."
+  ]
+}
