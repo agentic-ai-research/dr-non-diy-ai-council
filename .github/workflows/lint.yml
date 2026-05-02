@@ -15,5 +15,8 @@ jobs:
       - name: Install ripgrep
         run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ripgrep
 
-      - name: Run lint
+      - name: Run lint — no exec of message content (Lock 5)
         run: bash scripts/lint-no-exec.sh
+
+      - name: Run lint — SOUL.md structure
+        run: bash scripts/lint-soul.sh
