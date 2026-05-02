@@ -17,6 +17,10 @@ state.db
 memories/
 gateway_state.json
 
+# Telethon session files (relay bridge auth tokens)
+*.session
+*.session-journal
+
 # Raw JSON configs with tokens (use .example.json instead)
 config.json
 openclaw.json
@@ -24,6 +28,7 @@ openclaw.json
 !examples/**/*.example.json
 !package.json
 !package-lock.json
+!infra/*.json
 
 # Python
 __pycache__/

@@ -1,10 +1,64 @@
 # Council Protocols
 
+> This doc governs **deliberation** — silence rules, floor handoffs, modes, adversarial pairs. For the basic communication protocol every justice follows on every turn (wire format, address syntax, fail-closed rules), start at [communication-protocol.md](communication-protocol.md). For tool-using bots, inter-builder collaboration (Eve ↔ LOL), the LAN-shared transcript, and cybersecurity guardrails, see [inter-bot-protocols.md](inter-bot-protocols.md).
+
 ## The Basic Idea
 
 Dr Non types a question into the Telegram group. Nine bots are in the group. They deliberate. The Chair (Tenet) runs the floor.
 
 The goal is not to have nine bots answer the same question — that's chaos. The goal is structured disagreement that produces better decisions than any single bot.
+
+---
+
+## Four Modes the Chair Picks Between
+
+The Chair (Tenet) does not deliberate on every inbound. Most inbounds are tasks, not judgment calls. Before any other rule in this doc applies, Tenet picks one of five routes.
+
+```
+ROUTE: TRIVIAL    → one specialist's lane. Answer or hand off in one line.
+ROUTE: WORKFLOW   → multiple specialists each return a different kind of fact. One pass.
+ROUTE: PRODUCTION → multi-pass assembly line. WIP cycles through stations until shipped.
+ROUTE: STANDING   → continuous job; declared once, runs until END-ORDER.
+ROUTE: JUDGMENT   → values trade-off or genuine disagreement expected. Convene the council.
+```
+
+The heuristic: one specialist's lane is TRIVIAL. Many specialists, one pass, mechanical synthesis is WORKFLOW. Many specialists, multiple passes, output of one stage feeds the next is PRODUCTION. Continuous monitoring or scheduled posting is STANDING. Values trade-off or expected disagreement is JUDGMENT.
+
+### Workflow mode — the new default for tasks
+
+Tenet decomposes the inbound into parallel asks, posts a `FAN-OUT:` block, and waits. When the returns are in (or the deadline hits), he posts a `FAN-IN:` synthesis. Reviewers — Ana, Civic, Aviva, Bob — are invoked **by name** on the `REVIEW:` line, not by Round 1 reflex. Each posts in ≤15s. Tenet pins.
+
+```
+ROUTE: WORKFLOW
+FAN-OUT:
+  - @hannah: pull last 6mo of similar decisions
+  - @radar:  fetch market signals
+  - @otto:   calendar bandwidth check
+DEADLINE: 60s
+FAN-IN:    tenet
+```
+
+Time budget: **under 2 minutes from inbound to pin.** Thinking justices do not take Round 1 turns in workflow mode — only the named reviewers speak after `FAN-IN:`.
+
+### Production mode — the assembly line
+
+When the inbound needs more than one pass through the specialists — output of one stage reveals what the next stage must do — Tenet declares `MODE: PRODUCTION  LINE: <name>` and the WIP flows through stations. The 2-turn silence cap is suspended for whichever justice's station is currently active; an andon cord rule lets any justice stop the line. Full grammar, the per-bot adaptive skills palette, and a worked example are in [production-mode.md](production-mode.md).
+
+### Judgment mode — the council deliberates
+
+Tenet declares one of `MODE: VERIFY | DECIDE | EXPLORE | DEBATE` and runs Round 1 / Round 2 as defined in *Morning Briefing Protocol* below. This is the deliberation pattern the Court was built for. Use it when a workflow surfaces a values trade-off, when a decision is irreversible, or when reviewers in workflow mode genuinely disagree.
+
+### Standing mode — declare a continuous job
+
+When the work runs forever (monitor a feed, post a daily digest, watch for mentions), Tenet declares `MODE: STANDING-ORDER  ORDER-ID: <slug>` and names an `OWNER`, `CADENCE`, `TERMS`, and an `APPROVAL` level. The order keeps running until `END-ORDER:`. Public-facing actions default to `APPROVAL: required-each` (every post passes through BENCH). Full grammar, palette, and the public-account rules are in [multi-task.md](multi-task.md).
+
+### Build mode — delegate to the builders
+
+Engineering work skips the council. Tenet declares `MODE: BUILD` and hands the floor to Eve or LOL per [inter-bot-protocols.md](inter-bot-protocols.md). Thinking justices stay silent.
+
+### Where the full router lives
+
+The decision rubric, the `FAN-OUT:` / `FAN-IN:` grammar, specialist response shapes, and a worked end-to-end example are in [tenet-router.md](tenet-router.md). That file is drop-in ready for Tenet's SOUL.md.
 
 ---
 

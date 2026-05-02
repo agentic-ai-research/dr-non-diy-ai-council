@@ -4,7 +4,7 @@
 
 # Dr Non's $0 DIY AI Council
 
-> Ten AI justices. One Telegram group. Running 24/7 on a Mac. Total cost: ~$3/month (one Claude-backed bot, the rest free).
+> Eleven AI justices. One Telegram group. Running 24/7 across two Macs. Total cost: ~$3/month (one Claude-backed bot, the rest free).
 
 ---
 
@@ -21,6 +21,32 @@ Send a business card photo → contact saved to both Google accounts, automatica
 Not a chatbot. Not a replication of Karpathy's llm-council. An **office** — thinkers, an executor, persistent memory about who you are, and MCP hooks so it learns from your Obsidian vault.
 
 Two weekends to build. Zero dollars a month to run. All inference on [NVIDIA NIM free tier](https://build.nvidia.com/) and [ThaiLLM](https://thaillm.or.th) — both free. The only hardware cost is the Mac sitting on my desk.
+
+---
+
+## Manus-class capability, at $0
+
+Manus.ai launched in March 2025 with $2B-class valuation discussion around their autonomous-agent thesis: a system that decomposes tasks, calls tools, and runs end-to-end without much human babysitting. Closed model, big infra, paid by token.
+
+This council reaches comparable autonomy on free-tier inference, runs on a Mac you already own, and ships its protocol stack as twelve markdown docs and ~600 lines of stdlib Python any team can fork. **The IP is the protocol stack** — see [docs/INDEX.md](docs/INDEX.md).
+
+| Dimension | Manus.ai-class | This Council |
+|---|---|---|
+| **Infra cost** | Pay-per-token, closed pricing | $0 — NVIDIA NIM free + ThaiLLM free + one Claude bot at ~$3/mo |
+| **Hardware** | Cloud GPUs | Mac (M3 Air + M5 Max, 128GB) |
+| **Transparency** | Closed weights, closed protocol | Fully open — protocol + reference code in this repo |
+| **Coordination** | Internal RPC | Single shared JSONL transcript + user-account Telethon relay |
+| **Termination rules** | Implicit | Four explicit task classes — `TRIVIAL` / `WORKFLOW` / `PRODUCTION` / `STANDING` / `JUDGMENT` |
+| **Reputation guard** | Implicit | `BENCH:` gate on every public-facing action; default `required-each` until graduated |
+| **Learning** | Fine-tuned weights (proprietary) | Per-bot exemplar libraries from pinned threads — runs in cron, no GPU |
+| **Failure mode** | Centralized — one outage takes the system down | Per-justice — file-based source of truth survives bot crashes |
+| **Setup** | SaaS signup + cloud config | `git clone` + drop launchd plists; eleven justices online in an evening |
+
+Honest gaps — what this is **not yet** at parity on: full browser automation, computer-use control of a sandboxed VM, fine-tuned tool-use weights. Those are the next milestones in [ROADMAP.md](ROADMAP.md).
+
+The pitch in one line: **eleven palindrome-named justices, four operating modes plus standing orders, four cybersecurity locks enforced by code or CI, an open-source Telethon relay for binary-only bot frameworks, and a `BENCH:` protocol that lets the council ask Dr Non for a private ruling without crowding the group.**
+
+If Manus opened the eyes, this opens the codebase.
 
 ---
 
@@ -63,7 +89,7 @@ Other prior work worth reading: [MAD (ICLR 2025)](https://d2jud02ci9yv69.cloudfr
 
 ## The Court
 
-All ten justices have **palindrome names** — they read the same forwards and backwards. This is intentional. The council reflects back what you put in.
+All eleven justices have **palindrome names** — they read the same forwards and backwards. This is intentional. The council reflects back what you put in.
 
 | Justice | Role | Archetype | Model | Capability |
 |---|---|---|---|---|
@@ -75,9 +101,10 @@ All ten justices have **palindrome names** — they read the same forwards and b
 | **Ana** | Kantian Pragmatist | Miss Marple | Mistral Nemotron | Kant's duty + James's pragmatism + Hemingway's directness |
 | **Civic** | Utilitarian | Civic | Devstral 2 | Mill's utility + Freud's unconscious + Lewis's storytelling |
 | **Aviva** | Strategist | Mrs Hudson | Nemotron 49B | Long-view, pattern synthesis *(in progress)* |
-| **Bob** | Generalist | Lestrade | Nanobot-Mistral | Ground-level common sense — the "yeah but in practice..." voice |
+| **Bob** | Generalist + Mandatory Reviewer | Lestrade | DeepSeek V3 (Nanobot) | Ground-level common sense with reasoning depth — the "yeah but in practice..." voice that catches what the other eleven missed. The only **mandatory** reviewer per [task-lifecycle.md](docs/task-lifecycle.md) — every PIN passes through his `SANITY:` check. Telegram: `@nonmind_bot`. |
 | **Pip** 🔧 | Utility Scribe | Dickensian junior | Mistral Small | QR codes · OCR · Peter's Drive · print-friendly PDFs · meeting notes |
 | **Eve** ⚙️ | Engineer / Builder | Karpathy | Claude Sonnet 4.5 | Reads vault git log + session archive + blackboard. Returns one of: `STATUS:` / `BUILD ESTIMATE:` / `BLOCKER:` / `PASS`. Grounds debate in shipped reality. Local-only. |
+| **LOL** ⚙️ | iOS Builder (Eve's twin) | Karpathy | Claude Sonnet 4.5 (M5 Max) | iOS-side counterpart to Eve. Owns Xcode / Swift / simulator on a separate MacBook Pro M5 Max (128GB RAM). Same four-format reply discipline plus `CONTRACT:` / `NEEDS-IOS:` / `NEEDS-BACKEND:` handoff verbs for cross-platform work. Shares `~/.council/transcript.jsonl` via Tailscale. |
 
 **The Easter egg — noN.** One more bot. Three personalities: *noN* (silent observer, speaks when it counts), *NoN* (bold — Mark Manson mode), *Non* (mirrors Dr Non himself). Doesn't deliberate. Interrupts once per session, when the room needs it.
 

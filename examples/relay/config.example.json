@@ -1,0 +1,41 @@
+{
+  "_comment": "Copy to config.json (gitignored) and fill in. See docs/relay-bridge.md for setup.",
+
+  "session_name":     "council-relay",
+  "api_id":           0,
+  "api_hash":         "REPLACE_WITH_API_HASH_FROM_my.telegram.org",
+
+  "council_group_id": -1001234567890,
+
+  "bot_usernames": [
+    "NonTenet_bot",
+    "NonRadar_bot",
+    "NonOtto_bot",
+    "NonHannah_bot",
+    "NonAda_bot",
+    "NonAna_bot",
+    "NonCivic_bot",
+    "NonAviva_bot",
+    "nonmind_bot",
+    "NonPip_bot",
+    "NonEve_bot",
+    "NonLOL_bot",
+    "NonNoN_bot"
+  ],
+
+  "bot_names": {
+    "NonTenet_bot":  "Tenet",
+    "NonRadar_bot":  "Radar",
+    "NonOtto_bot":   "Otto",
+    "NonHannah_bot": "Hannah",
+    "NonAda_bot":    "Ada",
+    "NonAna_bot":    "Ana",
+    "NonCivic_bot":  "Civic",
+    "NonAviva_bot":  "Aviva",
+    "nonmind_bot":   "Bob",
+    "NonPip_bot":    "Pip",
+    "NonEve_bot":    "Eve",
+    "NonLOL_bot":    "LOL",
+    "NonNoN_bot":    "noN"
+  }
+}

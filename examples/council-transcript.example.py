@@ -15,6 +15,8 @@ from __future__ import annotations
 import datetime as _dt
 import json
 import os
+import re
+import socket
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -25,6 +27,24 @@ SYMLINK = COUNCIL_DIR / "transcript.jsonl"
 
 DEFAULT_RECENT_N = 25
 MAX_TEXT_LEN = 1500
+
+# Lock 2 from docs/inter-bot-protocols.md — strip obvious key shapes before
+# the line ever hits disk. Cheap, prevents the most likely real leak (a
+# builder pasting an env var into a STATUS: line by accident).
+_REDACT_PATTERNS = [
+    (re.compile(r"sk-[A-Za-z0-9]{20,}"),                "sk-…REDACTED"),
+    (re.compile(r"ghp_[A-Za-z0-9]{30,}"),               "ghp_…REDACTED"),
+    (re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"),       "xox?-…REDACTED"),
+    (re.compile(r"Bearer\s+[A-Za-z0-9._\-]{20,}"),      "Bearer …REDACTED"),
+    (re.compile(r"AKIA[0-9A-Z]{16}"),                   "AKIA…REDACTED"),
+    (re.compile(r"(?i)password\s*[:=]\s*\S+"),          "password=REDACTED"),
+]
+
+
+def _redact(s: str) -> str:
+    for pat, repl in _REDACT_PATTERNS:
+        s = pat.sub(repl, s)
+    return s
 
 
 def _today_path() -> Path:
@@ -52,16 +72,27 @@ def bot_name() -> str:
     return os.environ.get("COUNCIL_BOT_NAME", "Unknown").strip() or "Unknown"
 
 
+def bot_id() -> str:
+    """Stable identifier for this bot, separate from the display name."""
+    return os.environ.get("COUNCIL_BOT_ID", bot_name().lower()).strip()
+
+
 def append(text: str, *, from_name: Optional[str] = None) -> None:
-    """Append an outbound council message. Failures are non-fatal."""
+    """Append an outbound council message. Failures are non-fatal.
+
+    Schema matches docs/inter-bot-protocols.md (`from`, `bot_id`, `machine`,
+    `ts`, `text`). Lock 2 redaction runs before write — never log a secret.
+    """
     if not text or not text.strip():
         return
     try:
         target = _ensure_symlink()
         record = {
-            "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
-            "from": from_name or bot_name(),
-            "text": text[:MAX_TEXT_LEN],
+            "ts":      _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+            "from":    from_name or bot_name(),
+            "bot_id":  bot_id(),
+            "machine": socket.gethostname(),
+            "text":    _redact(text)[:MAX_TEXT_LEN],
         }
         with target.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")

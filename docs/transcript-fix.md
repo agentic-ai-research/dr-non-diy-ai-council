@@ -72,7 +72,9 @@ Each bot identifies itself via `$COUNCIL_BOT_NAME` (set in its launchd plist).
 |---|---|---|
 | nanobot (Python) | `nanobot/channels/telegram.py` `send()` method | `nanobot/agent/context.py` `build_messages()` method |
 | Hermes (Python) | `gateway/platforms/telegram.py` `send()` method | (deferred — system prompt is cached per session) |
-| OpenClaw / PicoClaw (Go) | log-tailer sidecar (planned) | (defer — needs binary patching or MCP server) |
+| OpenClaw / PicoClaw (Go) | user-account relay — see [relay-bridge.md](relay-bridge.md) | user-account relay re-posts in-group; receiving bot reads via normal Telegram delivery |
+
+For Go binaries (and any framework where adding a transcript hook means rebuilding), the user-account relay in [relay-bridge.md](relay-bridge.md) handles both hooks: it appends to `transcript.jsonl` on the bot's behalf and re-posts the message into the group with a `[council-relay]` tag so other bots receive it through the normal Telegram path. A SOUL.md prompt rule is the only change needed on the unpatched bot.
 
 ## Companion prompt rules
 
