@@ -17,6 +17,16 @@ The three middle stages — **UNDERSTANDING, DISTRIBUTION, EXECUTION** — are w
 
 ---
 
+## Stage 0.5 — ACK (the 3-second contract)
+
+Before UNDERSTANDING, before anything else, Tenet **acknowledges** the inbound within 3 seconds. The full contract — task identity, the state machine, priority, depth, est-wait, dead-letter — is in [queue.md](queue.md). The minimum every justice respects:
+
+- Within 3 seconds of any Dr Non message, an `ACK: <task_id> [state=… depth=… your-position=#…]` line lands in the council transcript.
+- The ACK runs *before* the dumb-question filter, *before* mode classification, *before* any FAN-OUT.
+- If Tenet's harness can't ACK (e.g., crashed mid-startup), a backstop process emits a fallback ACK so Dr Non never sees silence. *Nothing left unacknowledged* is a constitutional promise, not a goal.
+
+After ACK, the rest of this doc applies — Stage 1 onwards.
+
 ## Stage 1 — UNDERSTANDING (Tenet's intake filter)
 
 Every inbound passes through five questions, in order, in ≤8 seconds:

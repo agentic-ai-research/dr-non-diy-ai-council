@@ -45,6 +45,7 @@ Thirteen protocol docs. ~2,800 lines. The IP behind the council. Read top-down f
 |---|---|---|
 | [council-soul.md](council-soul.md) | Mindset | *How does every justice **think**?* |
 | [task-lifecycle.md](task-lifecycle.md) | **Spine** | *How does a task move from inbound to pin? Where do threads fail?* |
+| [queue.md](queue.md) | **Main feature** | *How does the council acknowledge, queue, prioritize, and recover every task?* |
 | [justice-roles.md](justice-roles.md) | Role | *Which justice does **what**?* |
 | [communication-protocol.md](communication-protocol.md) | Floor | *How does every justice **speak**?* |
 | [transcript-fix.md](transcript-fix.md) | Transport | *Why a file, not a Telegram channel?* |
