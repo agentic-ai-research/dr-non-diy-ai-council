@@ -5,6 +5,8 @@
 # Dr Non's $0 DIY AI Council
 
 > Eleven AI justices. One Telegram group. Running 24/7 across two Macs. Total cost: ~$3/month (one Claude-backed bot, the rest free).
+>
+> **Multi-tasking is the council's main feature.** Every inbound from Dr Non gets an `ACK:` line in the council transcript within 3 seconds — *nothing left unacknowledged* — then queued by priority with a full state machine end-to-end. See [docs/queue.md](docs/queue.md).
 
 ---
 
@@ -36,6 +38,7 @@ This council reaches comparable autonomy on free-tier inference, runs on a Mac y
 | **Hardware** | Cloud GPUs | Mac (M3 Air + M5 Max, 128GB) |
 | **Transparency** | Closed weights, closed protocol | Fully open — protocol + reference code in this repo |
 | **Coordination** | Internal RPC | Single shared JSONL transcript + user-account Telethon relay |
+| **Concurrency** | Implicit per-call | File-based queue with ACK contract, state machine (`RECEIVED → QUEUED → CLAIMED → IN-FLIGHT → DONE`), priority tiers, dead-letter, visibility-timeout recovery — see [docs/queue.md](docs/queue.md) |
 | **Termination rules** | Implicit | Four explicit task classes — `TRIVIAL` / `WORKFLOW` / `PRODUCTION` / `STANDING` / `JUDGMENT` |
 | **Reputation guard** | Implicit | `BENCH:` gate on every public-facing action; default `required-each` until graduated |
 | **Learning** | Fine-tuned weights (proprietary) | Per-bot exemplar libraries from pinned threads — runs in cron, no GPU |

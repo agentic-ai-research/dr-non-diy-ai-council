@@ -1,5 +1,7 @@
 # Multi-task — concurrent threads, task termination, standing orders, public accounts
 
+> **For the canonical task queue** — ACK contract, state machine, priority, dead-letter, the *Nothing unacknowledged* promise — see [queue.md](queue.md). This doc covers the per-thread tagging and standing-order *subsets* that sit on top of the queue.
+>
 > Companion to [council-protocols.md](council-protocols.md), [tenet-router.md](tenet-router.md), [justice-roles.md](justice-roles.md). The council runs N threads in parallel. Quick answers terminate fast. Long builds run until shipped. Standing orders run forever. Public posting always passes through the bench.
 
 ## Concurrent threads
