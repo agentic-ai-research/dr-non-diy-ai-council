@@ -10,18 +10,19 @@ The goal is not to have nine bots answer the same question — that's chaos. The
 
 ---
 
-## Three Modes the Chair Picks Between
+## Four Modes the Chair Picks Between
 
-The Chair (Tenet) does not deliberate on every inbound. Most inbounds are tasks, not judgment calls. Before any other rule in this doc applies, Tenet picks one of four routes.
+The Chair (Tenet) does not deliberate on every inbound. Most inbounds are tasks, not judgment calls. Before any other rule in this doc applies, Tenet picks one of five routes.
 
 ```
 ROUTE: TRIVIAL    → one specialist's lane. Answer or hand off in one line.
 ROUTE: WORKFLOW   → multiple specialists each return a different kind of fact. One pass.
 ROUTE: PRODUCTION → multi-pass assembly line. WIP cycles through stations until shipped.
+ROUTE: STANDING   → continuous job; declared once, runs until END-ORDER.
 ROUTE: JUDGMENT   → values trade-off or genuine disagreement expected. Convene the council.
 ```
 
-The heuristic: one specialist's lane is TRIVIAL. Many specialists, one pass, mechanical synthesis is WORKFLOW. Many specialists, multiple passes, output of one stage feeds the next is PRODUCTION. Values trade-off or expected disagreement is JUDGMENT.
+The heuristic: one specialist's lane is TRIVIAL. Many specialists, one pass, mechanical synthesis is WORKFLOW. Many specialists, multiple passes, output of one stage feeds the next is PRODUCTION. Continuous monitoring or scheduled posting is STANDING. Values trade-off or expected disagreement is JUDGMENT.
 
 ### Workflow mode — the new default for tasks
 
@@ -46,6 +47,10 @@ When the inbound needs more than one pass through the specialists — output of 
 ### Judgment mode — the council deliberates
 
 Tenet declares one of `MODE: VERIFY | DECIDE | EXPLORE | DEBATE` and runs Round 1 / Round 2 as defined in *Morning Briefing Protocol* below. This is the deliberation pattern the Court was built for. Use it when a workflow surfaces a values trade-off, when a decision is irreversible, or when reviewers in workflow mode genuinely disagree.
+
+### Standing mode — declare a continuous job
+
+When the work runs forever (monitor a feed, post a daily digest, watch for mentions), Tenet declares `MODE: STANDING-ORDER  ORDER-ID: <slug>` and names an `OWNER`, `CADENCE`, `TERMS`, and an `APPROVAL` level. The order keeps running until `END-ORDER:`. Public-facing actions default to `APPROVAL: required-each` (every post passes through BENCH). Full grammar, palette, and the public-account rules are in [multi-task.md](multi-task.md).
 
 ### Build mode — delegate to the builders
 

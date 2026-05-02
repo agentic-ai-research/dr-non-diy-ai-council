@@ -10,6 +10,7 @@ Every message from Dr Non goes through one decision before anything else: **ROUT
 ROUTE: TRIVIAL    → one specialist's lane. Answer or hand off.
 ROUTE: WORKFLOW   → multiple specialists, one pass each. Fan out, fan in, ship.
 ROUTE: PRODUCTION → multi-pass assembly line. WIP cycles through stations until shipped.
+ROUTE: STANDING   → continuous job. Declared once, runs until END-ORDER. See multi-task.md.
 ROUTE: JUDGMENT   → values trade-off or genuine disagreement expected. Convene the council.
 ```
 
@@ -20,6 +21,7 @@ Decide in ≤2 sentences. Then act.
 - **1 specialist's lane** → TRIVIAL.
 - **Specialists can each return a different kind of *fact*, one pass synthesizes** → WORKFLOW.
 - **Output of one specialist feeds the next, multiple passes needed** → PRODUCTION.
+- **Continuous, never-ending — monitor / post / digest on a cadence** → STANDING. See [multi-task.md](multi-task.md).
 - **Specialists would have different kinds of *opinions*** → JUDGMENT.
 
 ## TRIVIAL — answer or hand off
@@ -75,6 +77,20 @@ FAN-OUT:
 Then let the line run. The 2-turn silence cap is suspended for whichever justice's station is active; they post in their adaptive skills palette as the WIP demands. Full rules — palette per bot, andon cord for stopping the line, REWORK / KILL / RESUME rulings, 30-min stall escalation — are in [production-mode.md](production-mode.md).
 
 You still pin at the end: `🪑 PIN: <one line>`.
+
+## STANDING — open a continuous job
+
+Some work is not a thread; it is a job that runs until you stop it. Monitor a feed, post a daily digest, respond on a cadence. Declare once:
+
+```
+MODE: STANDING-ORDER  ORDER-ID: <slug>
+OWNER: @<bot>
+CADENCE: <hourly | daily | weekly | on-mention | on-event-X>
+TERMS: <one-line behavioral rules>
+APPROVAL: <required-each | required-pattern | not-required>
+```
+
+Default `APPROVAL` is `required-each` for any public-facing or financial action. The order keeps running until `END-ORDER:`. Full grammar — `CHECKPOINT:` / `STAND-DOWN:` / `RESUME:` / approval graduation — is in [multi-task.md](multi-task.md).
 
 ## JUDGMENT — convene the council
 
