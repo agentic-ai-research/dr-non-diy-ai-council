@@ -55,6 +55,7 @@ Thirteen protocol docs. ~2,800 lines. The IP behind the council. Read top-down f
 | [production-mode.md](production-mode.md) | Production | *How does the assembly line ship?* |
 | [multi-task.md](multi-task.md) | Concurrency | *N threads, standing orders, public accounts.* |
 | [learning-loops.md](learning-loops.md) | Learning | *How does each justice **get better**?* |
+| [resilience.md](resilience.md) | Survival | *What happens when a provider is down or a binary keeps crashing?* |
 | [bot-personalities.md](bot-personalities.md) | Voice | *What does each justice **sound like**?* |
 
 ## The layered hierarchy

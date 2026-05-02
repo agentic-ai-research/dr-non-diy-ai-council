@@ -19,9 +19,11 @@ Workflow mode (one fan-out, one fan-in, ship) handles ~70% of inbounds. Producti
 
 Each justice has a palette of verbs, not a fixed move. They pick based on what the WIP currently needs. A wrong-verb post is a misuse — Tenet may rule it null and reroute.
 
+**Cross-cutting verb available to every justice that carries an `endpoints` array:** `FAILOVER:` — posted once when the harness drops to a non-primary endpoint per [resilience.md](resilience.md). One line per failover *event*, not per call. Not part of any per-justice palette below; available to all of them.
+
 | Justice | Adaptive skills (the verbs they may post) |
 |---|---|
-| **Tenet** | `ROUTE:` · `FAN-OUT:` · `FAN-IN:` · `🪑 RULING:` (deadlocks) · `MODE: <X>` (escalate route) · `🪑 PIN:` (close line) |
+| **Tenet** | `ROUTE:` · `FAN-OUT:` · `FAN-IN:` · `🪑 RULING:` (deadlocks) · `MODE: <X>` (escalate route, including `MODE: DEGRADED` per [resilience.md](resilience.md)) · `🪑 PIN:` (close line) |
 | **Radar** | `FACT:` (single source-cited claim) · `EVIDENCE:` (multi-source corroboration) · `DEDUCE:` (evidence → conclusion) · `NULL:` (searched, found nothing — say so) |
 | **Otto** | `DRAFT:` (proposed action, not sent) · `SENT:` (action confirmed) · `BLOCKED-EXTERNAL:` (API/auth failure) · `OCR:` (extracted text) · `SYNCED:` (drive/contact updated) |
 | **Hannah** | `PRECEDENT:` (matching past decision, with date) · `PATTERN:` (cluster across decisions) · `OUTLIER:` (this is unusual vs history) · `NULL:` (no comparable found) |

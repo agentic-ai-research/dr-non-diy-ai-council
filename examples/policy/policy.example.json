@@ -23,7 +23,14 @@
       "constraints": {
         "web-fetch": "read-only",
         "email":     { "max_recipients": 3, "no_mass": true }
-      }
+      },
+      "_comment_endpoints": "Layer-1 failover from docs/resilience.md. The harness walks this array on 401/429/timeout. Sticky for 5 min on a fallback before retrying primary.",
+      "endpoints": [
+        { "provider": "nvidia-nim",   "model": "qwen3-480b",   "key_ref": "council-otto-nim" },
+        { "provider": "openrouter",   "model": "qwen-2.5-72b", "key_ref": "council-otto-openrouter" },
+        { "provider": "together",     "model": "qwen2.5-72b",  "key_ref": "council-otto-together" },
+        { "provider": "ollama-local", "model": "qwen2.5:72b",  "host": "http://localhost:11434" }
+      ]
     },
 
     "pip": {
