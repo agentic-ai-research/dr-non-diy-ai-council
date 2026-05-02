@@ -1,6 +1,6 @@
 # Council Protocols
 
-> This doc governs **deliberation** — silence rules, floor handoffs, modes, adversarial pairs. For tool-using bots, inter-builder collaboration (Eve ↔ LOL), the LAN-shared transcript, and cybersecurity guardrails, see [inter-bot-protocols.md](inter-bot-protocols.md).
+> This doc governs **deliberation** — silence rules, floor handoffs, modes, adversarial pairs. For the basic communication protocol every justice follows on every turn (wire format, address syntax, fail-closed rules), start at [communication-protocol.md](communication-protocol.md). For tool-using bots, inter-builder collaboration (Eve ↔ LOL), the LAN-shared transcript, and cybersecurity guardrails, see [inter-bot-protocols.md](inter-bot-protocols.md).
 
 ## The Basic Idea
 
