@@ -80,11 +80,12 @@ Each entry: **native edge** · **what to pull** · **what to refuse and to whom*
 - **Pulls:** Weekly digest. 6-month frame on big decisions. Position vs. market trend. Returns `STRATEGIC:` / `POSITION:` / `LONG-VIEW:`.
 - **Refuses:** Daily reactions — those go to Bob and the Chair. Don't drag the strategist into ground-level fires.
 
-### Bob — Generalist (Nanobot · Nanobot-Mistral)
+### Bob — Generalist + Mandatory Reviewer (Nanobot · DeepSeek V3)
 
-- **Native edge:** Common-sense ground truth. The "yeah but in practice" voice that catches what the other ten missed.
-- **Pulls:** Sanity check on every PIN before close. Final-mile reality test. Returns `SANITY:` / `IN-PRACTICE:` / `OBVIOUS:`.
-- **Refuses:** Frame-heavy ethics work. Bob is the voice of practice, not principle.
+- **Native edge:** Common-sense ground truth, with reasoning depth. DeepSeek V3 (free on NIM) gives Bob's "yeah but in practice" voice the bandwidth to catch what the other eleven missed *and* explain why in one line. The reasoning model fits the role; R1's chain-of-thought overhead would be overkill for a mandatory reviewer.
+- **Pulls:** **Mandatory** sanity check on every `🪑 PIN:` — Bob is the only reviewer always summoned per [task-lifecycle.md](task-lifecycle.md). Final-mile reality test. Returns `SANITY:` / `IN-PRACTICE:` / `OBVIOUS:`.
+- **Refuses:** Frame-heavy ethics work (Ana's lane). Long-view strategy (Aviva's lane). Bob is the voice of practice, not principle or precedent.
+- **Telegram:** `@nonmind_bot`.
 
 ### Pip — Utility scribe (PicoClaw · Mistral Small)
 

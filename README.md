@@ -101,7 +101,7 @@ All eleven justices have **palindrome names** — they read the same forwards an
 | **Ana** | Kantian Pragmatist | Miss Marple | Mistral Nemotron | Kant's duty + James's pragmatism + Hemingway's directness |
 | **Civic** | Utilitarian | Civic | Devstral 2 | Mill's utility + Freud's unconscious + Lewis's storytelling |
 | **Aviva** | Strategist | Mrs Hudson | Nemotron 49B | Long-view, pattern synthesis *(in progress)* |
-| **Bob** | Generalist | Lestrade | Nanobot-Mistral | Ground-level common sense — the "yeah but in practice..." voice |
+| **Bob** | Generalist + Mandatory Reviewer | Lestrade | DeepSeek V3 (Nanobot) | Ground-level common sense with reasoning depth — the "yeah but in practice..." voice that catches what the other eleven missed. The only **mandatory** reviewer per [task-lifecycle.md](docs/task-lifecycle.md) — every PIN passes through his `SANITY:` check. Telegram: `@nonmind_bot`. |
 | **Pip** 🔧 | Utility Scribe | Dickensian junior | Mistral Small | QR codes · OCR · Peter's Drive · print-friendly PDFs · meeting notes |
 | **Eve** ⚙️ | Engineer / Builder | Karpathy | Claude Sonnet 4.5 | Reads vault git log + session archive + blackboard. Returns one of: `STATUS:` / `BUILD ESTIMATE:` / `BLOCKER:` / `PASS`. Grounds debate in shipped reality. Local-only. |
 | **LOL** ⚙️ | iOS Builder (Eve's twin) | Karpathy | Claude Sonnet 4.5 (M5 Max) | iOS-side counterpart to Eve. Owns Xcode / Swift / simulator on a separate MacBook Pro M5 Max (128GB RAM). Same four-format reply discipline plus `CONTRACT:` / `NEEDS-IOS:` / `NEEDS-BACKEND:` handoff verbs for cross-platform work. Shares `~/.council/transcript.jsonl` via Tailscale. |
