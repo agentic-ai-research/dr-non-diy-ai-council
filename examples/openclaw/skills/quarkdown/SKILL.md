@@ -106,7 +106,10 @@ If `--source` is already `.qd`, it's compiled as-is (no injection).
 
 ## Output
 
-The compiled site/deck/book lives at `<out>/`. Open `<out>/index.html` in a browser, or grab the PDF at `<out>/<title>.pdf` (when `--pdf` is set).
+- **HTML mode** (no `--pdf`): `<out>/<docname>/index.html` — open in browser.
+- **PDF mode** (`--pdf` set): `<out>/<stem>.pdf` — HTML is a temp artefact Quarkdown cleans up.
+
+The script always prints the exact output path on success.
 
 ## Verification
 

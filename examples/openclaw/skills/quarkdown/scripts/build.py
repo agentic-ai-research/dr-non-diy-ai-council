@@ -4,9 +4,9 @@ quarkdown — compile Markdown into slides / paged PDFs / wikis / HTML
 via the Quarkdown CLI.
 
 Sister to epub-publisher. Stdlib-only Python wrapper around `quarkdown c`.
-The user runs `brew install quarkdown-labs/quarkdown/quarkdown` once; this
-script does the frontmatter injection, doctype auto-detection, and output
-plumbing so the same skill handles slides, paged books, wikis, and plain HTML.
+On first run the script auto-installs Quarkdown via Homebrew and resolves
+keg-only Java (openjdk@21) from its Homebrew prefix so no manual PATH
+tweaking is needed. The user just runs the script; prereqs arrive automatically.
 
 Usage:
     python3 build.py --source talk.md --type slides --pdf --out /tmp/talk
@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import shutil
 import subprocess
 import sys
@@ -36,16 +37,12 @@ DOCTYPE_KEYWORDS = {
 
 DEFAULT_OUT_BASE = Path.home() / ".openclaw" / "workspace" / "quarkdown"
 
-INSTALL_HINT = """\
-Quarkdown or Java is missing. One-time install on macOS:
-
-    brew install --cask temurin@21                    # Java 17+
-    brew install quarkdown-labs/quarkdown/quarkdown   # Quarkdown CLI
-
-Verify:
-    java -version    # >= 17
-    quarkdown --version
-"""
+# Homebrew keg paths for Java (openjdk@21 installed via `brew install openjdk@21`)
+_JAVA_KEG_CANDIDATES = [
+    Path("/opt/homebrew/opt/openjdk@21/bin/java"),   # Apple Silicon
+    Path("/usr/local/opt/openjdk@21/bin/java"),       # Intel Mac
+    Path("/opt/homebrew/opt/openjdk/bin/java"),        # latest openjdk keg
+]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,17 +54,66 @@ log = logging.getLogger("quarkdown")
 
 # --- Preflight -----------------------------------------------------------------
 
-def _which(bin_name: str) -> bool:
-    return shutil.which(bin_name) is not None
+def _which(bin_name: str) -> str | None:
+    """Return full path of bin_name if found on PATH, else None."""
+    return shutil.which(bin_name)
 
 
-def preflight() -> None:
-    """Verify quarkdown + java are on PATH; print install hint and exit if not."""
-    missing = [b for b in ("quarkdown", "java") if not _which(b)]
-    if missing:
-        log.error("missing on PATH: %s", ", ".join(missing))
-        print(INSTALL_HINT, file=sys.stderr)
+def _find_java() -> str | None:
+    """Return a usable `java` binary path (PATH first, then Homebrew keg)."""
+    on_path = _which("java")
+    if on_path:
+        return on_path
+    for candidate in _JAVA_KEG_CANDIDATES:
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+
+def _brew_install(pkg: str) -> bool:
+    """Run `brew install <pkg>` and return True on success."""
+    brew = _which("brew")
+    if not brew:
+        return False
+    log.info("auto-installing %s via Homebrew…", pkg)
+    result = subprocess.run([brew, "install", pkg], capture_output=False)
+    return result.returncode == 0
+
+
+def preflight() -> str:
+    """Ensure quarkdown and java are available; auto-install quarkdown if missing.
+
+    Returns the resolved path to the `java` binary (used to inject JAVA_HOME
+    into the quarkdown subprocess when java is keg-only).
+    """
+    # --- Java ---
+    java_path = _find_java()
+    if not java_path:
+        log.error(
+            "Java 17+ not found on PATH or in Homebrew keg paths. "
+            "Fix: brew install openjdk@21"
+        )
         sys.exit(1)
+    log.info("java: %s", java_path)
+
+    # --- Quarkdown ---
+    qd_path = _which("quarkdown")
+    if not qd_path:
+        log.warning("quarkdown not on PATH — attempting auto-install via Homebrew")
+        ok = _brew_install("quarkdown-labs/quarkdown/quarkdown")
+        if not ok:
+            log.error(
+                "Auto-install failed. Run manually:\n"
+                "    brew install quarkdown-labs/quarkdown/quarkdown"
+            )
+            sys.exit(1)
+        qd_path = _which("quarkdown")
+        if not qd_path:
+            log.error("quarkdown still not found after install — restart your shell?")
+            sys.exit(1)
+    log.info("quarkdown: %s", qd_path)
+
+    return java_path
 
 
 # --- Doctype detection ---------------------------------------------------------
@@ -125,8 +171,12 @@ def prepare_source(source: Path, *, title: str, doctype: str, language: str,
 # --- Compile -------------------------------------------------------------------
 
 def run_quarkdown(source: Path, out: Path, *, pdf: bool, clean: bool,
-                  extra_args: list[str]) -> None:
-    """Invoke `quarkdown c` with the assembled args."""
+                  extra_args: list[str], java_path: str | None = None) -> None:
+    """Invoke `quarkdown c` with the assembled args.
+
+    When `java_path` points to a Homebrew keg binary (not on the system PATH),
+    we inject JAVA_HOME so that the Quarkdown JVM launcher can find the runtime.
+    """
     out.parent.mkdir(parents=True, exist_ok=True)
     cmd: list[str] = ["quarkdown", "c", str(source), "--out", str(out)]
     if pdf:
@@ -135,8 +185,17 @@ def run_quarkdown(source: Path, out: Path, *, pdf: bool, clean: bool,
         cmd.append("--clean")
     cmd.extend(extra_args)
     log.info("running: %s", " ".join(cmd))
+
+    env = os.environ.copy()
+    if java_path and not shutil.which("java"):
+        # keg-only Java: set JAVA_HOME so the quarkdown launcher finds it
+        java_home = str(Path(java_path).parent.parent)  # bin/java -> parent dir
+        env["JAVA_HOME"] = java_home
+        env["PATH"] = str(Path(java_path).parent) + os.pathsep + env.get("PATH", "")
+        log.info("keg-only Java detected — JAVA_HOME=%s", java_home)
+
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, env=env)
     except subprocess.CalledProcessError as e:
         log.error("quarkdown exited with code %d", e.returncode)
         sys.exit(e.returncode)
@@ -146,7 +205,7 @@ def run_quarkdown(source: Path, out: Path, *, pdf: bool, clean: bool,
 
 def self_test() -> int:
     """Write a tiny .qd, compile to plain HTML, assert index.html exists."""
-    preflight()
+    java_path = preflight()
     work = Path(tempfile.mkdtemp(prefix="quarkdown-selftest-"))
     src = work / "hello.qd"
     src.write_text(
@@ -160,14 +219,15 @@ def self_test() -> int:
         encoding="utf-8",
     )
     out = work / "out"
-    run_quarkdown(src, out, pdf=False, clean=True, extra_args=[])
-    expected = out / "index.html"
-    if not expected.exists():
-        log.error("self-test failed: %s missing", expected)
+    run_quarkdown(src, out, pdf=False, clean=True, extra_args=[], java_path=java_path)
+    # Quarkdown writes to <out>/<docname>/index.html, not <out>/index.html
+    found = next(out.rglob("index.html"), None)
+    if not found:
+        log.error("self-test failed: no index.html found under %s", out)
         return 1
-    size = expected.stat().st_size
-    log.info("✓ self-test passed: %s (%d bytes)", expected, size)
-    print(expected)
+    size = found.stat().st_size
+    log.info("✓ self-test passed: %s (%d bytes)", found, size)
+    print(found)
     return 0
 
 
@@ -212,7 +272,7 @@ def main() -> int:
         log.error("source must be .md or .qd (got %s)", source.suffix)
         return 1
 
-    preflight()
+    java_path = preflight()
 
     doctype = args.type or detect_doctype(source)
     if doctype not in VALID_DOCTYPES:
@@ -239,14 +299,18 @@ def main() -> int:
         source,
         title=title, doctype=doctype, language=args.language, author=args.author,
     )
-    run_quarkdown(prepared, out_dir, pdf=pdf, clean=clean, extra_args=extra)
+    run_quarkdown(prepared, out_dir, pdf=pdf, clean=clean, extra_args=extra,
+                  java_path=java_path)
 
-    index = out_dir / "index.html"
-    if index.exists():
-        log.info("✓ wrote %s", index)
-        print(index)
+    # Quarkdown output location depends on mode:
+    #   --pdf only  → <out_dir>/<stem>.pdf  (HTML is a temp artefact, cleaned up)
+    #   HTML only   → <out_dir>/<docname>/index.html
+    output = next(out_dir.rglob("*.pdf"), None) or next(out_dir.rglob("index.html"), None)
+    if output:
+        log.info("✓ wrote %s", output)
+        print(output)
     else:
-        log.warning("compile finished but %s not found — check %s", index, out_dir)
+        log.warning("compile finished but no output found under %s", out_dir)
     return 0
 
 
