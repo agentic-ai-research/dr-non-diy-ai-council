@@ -1,0 +1,45 @@
+name: tiktok-wisdom skill tests
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "examples/openclaw/skills/tiktok-wisdom/**"
+      - ".github/workflows/tiktok-wisdom-tests.yml"
+  pull_request:
+    paths:
+      - "examples/openclaw/skills/tiktok-wisdom/**"
+      - ".github/workflows/tiktok-wisdom-tests.yml"
+
+jobs:
+  pytest:
+    name: pytest (Python 3.11+)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/openclaw/skills/tiktok-wisdom
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install pytest
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Run unit tests
+        # Tests are pure Python — no LLM, network, ffmpeg, or API keys.
+        # Validates style detection, prompt loading, persona overlays,
+        # cache hash determinism + scoped invalidation, and TOML config
+        # loading. Should pass in under a second.
+        run: python -m pytest tests/ -v
+
+      - name: Smoke-test --help
+        # Doesn't run any pipeline stages, but proves the CLI parses with
+        # all argparse defaults intact and the cache lib imports cleanly.
+        run: python scripts/build.py --help > /dev/null
