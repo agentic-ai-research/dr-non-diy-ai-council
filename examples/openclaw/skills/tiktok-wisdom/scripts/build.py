@@ -49,6 +49,33 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib import cache as _cache  # noqa: E402
 
+
+# ── 0. config loader (optional --config <path>.toml) ─────────────────────
+def load_config_file(path: Path) -> dict:
+    """Load a TOML or JSON config file. Returns flat dict of kwargs that
+    will be merged with argparse defaults (CLI flags still override).
+    Schema mirrors argparse `dest` names: idea, voice_provider, voice_id,
+    style, strict, persona, blog_corpus, user_photos, no_push, etc."""
+    if not path.exists():
+        raise FileNotFoundError(f"--config: {path} not found")
+    if path.suffix.lower() in (".toml", ""):
+        try:
+            import tomllib   # Python 3.11+
+        except ImportError:
+            try:
+                import tomli as tomllib   # type: ignore
+            except ImportError:
+                raise RuntimeError(
+                    "TOML config needs Python 3.11+ (tomllib stdlib) "
+                    "or `pip install tomli`. JSON configs work everywhere."
+                )
+        with path.open("rb") as f:
+            return tomllib.load(f)
+    if path.suffix.lower() == ".json":
+        return json.loads(path.read_text())
+    raise RuntimeError(f"--config: unsupported extension {path.suffix} "
+                       f"(use .toml or .json)")
+
 # ── config ────────────────────────────────────────────────────────────────
 ENV_FILE         = Path.home() / ".openclaw" / ".env"
 DEFAULT_OUT_DIR  = Path.home() / "Brain" / "Council" / "Videos" / "wisdom"
@@ -945,53 +972,79 @@ def push_to_telegram(video_path: Path, caption: str, chats: list[int],
 
 # ── main ──────────────────────────────────────────────────────────────────
 def main() -> int:
+    # Pre-pass for --config so we can use its values as argparse defaults.
+    # This makes the precedence: CLI flag > config file > argparse default.
+    pre = argparse.ArgumentParser(add_help=False)
+    pre.add_argument("--config", default="")
+    pre_ns, _ = pre.parse_known_args()
+    cfg: dict = {}
+    if pre_ns.config:
+        cfg = load_config_file(Path(pre_ns.config).expanduser())
+
     p = argparse.ArgumentParser()
-    p.add_argument("--idea", required=True, help="Seed idea / quote / topic")
-    p.add_argument("--context", default="",
+    p.add_argument("--config", default="",
+                   help="TOML or JSON config file with default values for any "
+                        "of the flags below. CLI flags override config values. "
+                        "See configs/ for examples.")
+    # `idea` is required UNLESS provided in the config file.
+    p.add_argument("--idea", required="idea" not in cfg, default=cfg.get("idea", ""),
+                   help="Seed idea / quote / topic")
+    p.add_argument("--context", default=cfg.get("context", ""),
                    help="Folder to glob for related wiki/summary files (*.md, *.txt)")
-    p.add_argument("--blog-corpus", default="",
+    p.add_argument("--blog-corpus", default=cfg.get("blog_corpus", ""),
                    help="Path to a JSON list of WordPress REST posts: each entry "
                         "{title:{rendered}, content:{rendered}}")
-    p.add_argument("--user-photos", action="append", default=None,
+    p.add_argument("--user-photos", action="append",
+                   default=cfg.get("user_photos") or None,
                    help="Folder of your photos to mix in as filtered backdrops "
                         "(repeatable). Skipped if not provided.")
-    p.add_argument("--end-photo", default="",
+    p.add_argument("--end-photo", default=cfg.get("end_photo", ""),
                    help="End-card image path. Empty to skip.")
-    p.add_argument("--out", help="Output .mp4 path. "
-                                  "Default: ~/Brain/Council/Videos/wisdom/wisdom-NN.mp4")
-    p.add_argument("--target-seconds", type=int, default=75)
+    p.add_argument("--out", default=cfg.get("out") or None,
+                   help="Output .mp4 path. "
+                        "Default: ~/Brain/Council/Videos/wisdom/wisdom-NN.mp4")
+    p.add_argument("--target-seconds", type=int,
+                   default=cfg.get("target_seconds", 75))
     p.add_argument("--voice-provider", choices=["mac-say", "openai", "eleven"],
-                   default="mac-say",
+                   default=cfg.get("voice_provider", "mac-say"),
                    help="TTS provider. 'mac-say' is free + offline (default). "
                         "'openai' is ~$0.015/min. 'eleven' is ~$0.30/min with "
                         "voice cloning.")
-    p.add_argument("--voice-id", default="",
+    p.add_argument("--voice-id", default=cfg.get("voice_id", ""),
                    help="Voice identifier. mac-say: system voice name "
                         "(Daniel/Alex/Karen/etc). openai: alloy|echo|fable|"
                         "onyx|nova|shimmer. eleven: voice_id from your "
                         "ElevenLabs account.")
-    p.add_argument("--persona", default="plain",
+    p.add_argument("--persona", default=cfg.get("persona", "plain"),
                    help="Persona overlay file (prompts/personas/<name>.md). "
                         "Examples: plain, bangkok-architect, startup-founder.")
-    p.add_argument("--style", choices=["auto", "essay", "listicle"], default="auto",
+    p.add_argument("--style", choices=["auto", "essay", "listicle"],
+                   default=cfg.get("style", "auto"),
                    help="Script format. auto detects 'listicle' from idea.")
     p.add_argument("--strict", action="store_true",
+                   default=cfg.get("strict", False),
                    help="STRICT-SOURCE mode: script must use only stories/quotes "
                         "from the blog corpus. No invented anecdotes, names, or "
                         "quotes. Pulls 7 longer posts into context (vs 3 short).")
     p.add_argument("--draft-only", action="store_true",
+                   default=cfg.get("draft_only", False),
                    help="Draft script + cues, write an HTML preview, then STOP. "
                         "Lets you iterate on the idea before paying for TTS+ffmpeg.")
     p.add_argument("--no-cache", action="store_true",
+                   default=cfg.get("no_cache", False),
                    help="Disable stage cache; recompute everything from scratch.")
     p.add_argument("--from-cache", choices=list(_cache.STAGES_IN_ORDER),
-                   default="", metavar="STAGE",
+                   default=cfg.get("from_cache", ""), metavar="STAGE",
                    help="Invalidate cache from STAGE onward and re-run. "
                         "Stages: context|script|art|tts|video|captions|final. "
                         "Use this when TTS failed and you want to retry without "
                         "re-fetching art (--from-cache tts).")
-    p.add_argument("--no-push", action="store_true", help="Skip Telegram push")
-    p.add_argument("--no-captions", action="store_true", help="Skip caption burn-in")
+    p.add_argument("--no-push", action="store_true",
+                   default=cfg.get("no_push", False),
+                   help="Skip Telegram push")
+    p.add_argument("--no-captions", action="store_true",
+                   default=cfg.get("no_captions", False),
+                   help="Skip caption burn-in")
     args = p.parse_args()
 
     env = load_env()

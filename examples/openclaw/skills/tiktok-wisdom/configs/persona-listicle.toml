@@ -1,0 +1,26 @@
+# Listicle-style "what I wish I knew" videos in a startup-founder voice,
+# narrated by OpenAI tts-1 (cheap, no clone setup). The TikTok-native format:
+# HOOK → One/Two/Three → KICKER. Algorithm-friendly retention loop.
+#
+# Cost: ~$0.02 per render (gpt-4o-mini drafting + tts-1 voice).
+#
+# Usage:
+#   python3 ../scripts/build.py --config configs/persona-listicle.toml \
+#       --idea "Three things I wish I knew before raising my seed round"
+
+# OpenAI tts-1 — 6 voices: alloy, echo, fable, onyx, nova, shimmer.
+voice_provider = "openai"
+voice_id = "onyx"
+
+# Force listicle even if the idea wording doesn't trigger auto-detect.
+style = "listicle"
+
+# Founder voice overlay — Brooklyn coffee shops, cofounder names, cap-table
+# specifics. Swap to any persona file in prompts/personas/.
+persona = "startup-founder"
+
+# No blog corpus — we're inventing example scenes that fit the persona.
+# (Use --strict + --blog-corpus for source-faithful renders.)
+strict = false
+
+no_push = true
