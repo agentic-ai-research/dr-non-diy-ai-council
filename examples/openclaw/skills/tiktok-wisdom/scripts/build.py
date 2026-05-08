@@ -45,6 +45,10 @@ import argparse, glob, json, os, random, re, shutil, subprocess, sys, time, urll
 from datetime import datetime
 from pathlib import Path
 
+# Local lib (sibling dir; works for both `python build.py` and `from-package`)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lib import cache as _cache  # noqa: E402
+
 # ── config ────────────────────────────────────────────────────────────────
 ENV_FILE         = Path.home() / ".openclaw" / ".env"
 DEFAULT_OUT_DIR  = Path.home() / "Brain" / "Council" / "Videos" / "wisdom"
@@ -978,6 +982,14 @@ def main() -> int:
     p.add_argument("--draft-only", action="store_true",
                    help="Draft script + cues, write an HTML preview, then STOP. "
                         "Lets you iterate on the idea before paying for TTS+ffmpeg.")
+    p.add_argument("--no-cache", action="store_true",
+                   help="Disable stage cache; recompute everything from scratch.")
+    p.add_argument("--from-cache", choices=list(_cache.STAGES_IN_ORDER),
+                   default="", metavar="STAGE",
+                   help="Invalidate cache from STAGE onward and re-run. "
+                        "Stages: context|script|art|tts|video|captions|final. "
+                        "Use this when TTS failed and you want to retry without "
+                        "re-fetching art (--from-cache tts).")
     p.add_argument("--no-push", action="store_true", help="Skip Telegram push")
     p.add_argument("--no-captions", action="store_true", help="Skip caption burn-in")
     args = p.parse_args()
@@ -1012,8 +1024,25 @@ def main() -> int:
     work = out_path.parent / f"{out_path.stem}-work"
     work.mkdir(exist_ok=True)
 
+    # Cache invalidation (if requested)
+    use_cache = not args.no_cache
+    # Stage output paths — the cache layer reads these to know what
+    # `.cache-key` sidecars to remove when --from-cache is invoked.
+    stage_outputs = {
+        "script":   work / "plan.json",
+        "art":      work / "art",                    # dir, not file
+        "tts":      work / "voice.mp3",
+        "video":    work / "video-raw.mp4",
+        "captions": work / "video-captioned.mp4",
+        "final":    out_path,
+    }
+    if args.from_cache and use_cache:
+        _cache.invalidate_from(args.from_cache, stage_outputs)
+
     print(f"📍 idea: {args.idea[:80]}", file=sys.stderr)
     print(f"📤 out: {out_path}", file=sys.stderr)
+    if use_cache:
+        print(f"💾 cache: enabled (work dir: {work.name})", file=sys.stderr)
 
     # 1. Context
     print("\n[1/6] Gathering context…", file=sys.stderr)
@@ -1024,11 +1053,25 @@ def main() -> int:
     print(f"  pulled {len(context)} chars total"
           f"{' [strict]' if args.strict else ''}", file=sys.stderr)
 
-    # 2. Script + cues
+    # 2. Script + cues (cached — gpt-4o-mini at temperature=0.7 is
+    # non-deterministic, so without caching every retry produces a different
+    # script + cues, defeating downstream caches. We cache the LLM output
+    # keyed by the inputs that should determine it.)
     print("\n[2/6] Drafting script (gpt-4o-mini)…", file=sys.stderr)
-    plan = draft_script(args.idea, context, env["OPENAI_API_KEY"],
-                        style=args.style, strict=args.strict,
-                        persona=args.persona)
+    script_cache_path = work / "plan.json"
+    script_key = _cache.hash_inputs("script", args.idea, context,
+                                    args.style, args.strict, args.persona)
+    if use_cache and _cache.cache_check(script_cache_path, script_key):
+        plan = json.loads(script_cache_path.read_text())
+        print(f"  💾 cache hit — script '{plan.get('title','?')[:40]}' reused",
+              file=sys.stderr)
+    else:
+        plan = draft_script(args.idea, context, env["OPENAI_API_KEY"],
+                            style=args.style, strict=args.strict,
+                            persona=args.persona)
+        if use_cache:
+            script_cache_path.write_text(json.dumps(plan, indent=2))
+            _cache.cache_save(script_cache_path, script_key)
     title = plan.get("title", "Wisdom")
     script = plan.get("script", "")
     cues   = plan.get("visual_cues", [])
@@ -1049,7 +1092,7 @@ def main() -> int:
         print(preview_path)   # stdout for capture
         return 0
 
-    # 3. Art
+    # 3. Art (cached)
     print(f"\n[3/6] Fetching art for {len(cues)} cues…", file=sys.stderr)
     photo_dirs = [Path(p).expanduser() for p in (args.user_photos or [])]
     user_photos = _list_user_photos(photo_dirs)
@@ -1059,46 +1102,89 @@ def main() -> int:
         print(f"  found {len(user_photos)} user photo(s) — will mix in", file=sys.stderr)
     else:
         print(f"  no user photos provided — using art-only", file=sys.stderr)
-    art_paths = fetch_art_for_cues(cues, work / "art", user_photos=user_photos)
-    if not art_paths:
-        print("ERROR: no art could be fetched", file=sys.stderr); return 3
-    print(f"  ✓ {len(art_paths)} composite images built", file=sys.stderr)
+    art_dir = work / "art"
+    art_key = _cache.hash_inputs("art", cues, [str(p) for p in user_photos[:32]])
+    if use_cache and _cache.cache_check_dir(art_dir, art_key):
+        art_paths = sorted(art_dir.glob("composite-*.jpg"))
+        print(f"  💾 cache hit — {len(art_paths)} composites reused", file=sys.stderr)
+    else:
+        art_paths = fetch_art_for_cues(cues, art_dir, user_photos=user_photos)
+        if not art_paths:
+            print("ERROR: no art could be fetched", file=sys.stderr); return 3
+        if use_cache:
+            _cache.cache_save_dir(art_dir, art_key)
+        print(f"  ✓ {len(art_paths)} composite images built", file=sys.stderr)
 
-    # 4. TTS
+    # 4. TTS (cached)
     print(f"\n[4/6] Rendering voice ({args.voice_provider}/{voice_id})…",
           file=sys.stderr)
     audio_path = work / "voice.mp3"
-    duration = render_tts(script, args.voice_provider, voice_id, audio_path, env)
-    print(f"  ✓ {duration:.1f} s audio", file=sys.stderr)
+    tts_key = _cache.hash_inputs("tts", script, args.voice_provider, voice_id)
+    if use_cache and _cache.cache_check(audio_path, tts_key):
+        # Recompute duration via ffprobe (cheap)
+        p = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "default=noprint_wrappers=1:nokey=1", str(audio_path)],
+            capture_output=True, text=True,
+        )
+        duration = float(p.stdout.strip() or "0")
+        print(f"  💾 cache hit — {duration:.1f} s audio reused", file=sys.stderr)
+    else:
+        duration = render_tts(script, args.voice_provider, voice_id, audio_path, env)
+        if use_cache:
+            _cache.cache_save(audio_path, tts_key)
+        print(f"  ✓ {duration:.1f} s audio", file=sys.stderr)
 
-    # 5. Compose video
+    # 5. Compose video (cached)
     print(f"\n[5/6] Composing video {WIDTH}×{HEIGHT}@{duration:.0f} s…", file=sys.stderr)
     raw_video = work / "video-raw.mp4"
     end_card = Path(args.end_photo).expanduser() if args.end_photo else None
-    build_video(art_paths, audio_path, duration, end_card, raw_video, title=title)
+    video_key = _cache.hash_inputs("video", art_key, tts_key, str(end_card) if end_card else "")
+    if use_cache and _cache.cache_check(raw_video, video_key):
+        print(f"  💾 cache hit — raw video reused", file=sys.stderr)
+    else:
+        build_video(art_paths, audio_path, duration, end_card, raw_video, title=title)
+        if use_cache:
+            _cache.cache_save(raw_video, video_key)
+
+    # 5b. Captions (cached)
     if args.no_captions:
         intermediate = raw_video
     else:
         caption_chunks = split_script_for_captions(script, len(art_paths))
         intermediate = work / "video-captioned.mp4"
-        burn_captions(raw_video, intermediate, caption_chunks, duration)
+        cap_key = _cache.hash_inputs("captions", video_key, caption_chunks, duration)
+        if use_cache and _cache.cache_check(intermediate, cap_key):
+            print(f"  💾 cache hit — captioned video reused", file=sys.stderr)
+        else:
+            burn_captions(raw_video, intermediate, caption_chunks, duration)
+            if use_cache:
+                _cache.cache_save(intermediate, cap_key)
 
-    # Final pass: re-encode at lower bitrate so Telegram-friendly (~10 MB / min)
-    target_kbps = 1400
-    cmd_compress = [
-        "ffmpeg", "-y", "-i", str(intermediate),
-        "-c:v", "libx264", "-preset", "medium", "-crf", "26",
-        "-maxrate", f"{target_kbps}k", "-bufsize", f"{target_kbps*2}k",
-        "-pix_fmt", "yuv420p", "-r", "30",
-        "-c:a", "aac", "-b:a", "128k",
-        "-movflags", "+faststart",
-        str(out_path),
-    ]
-    r = subprocess.run(cmd_compress, capture_output=True, text=True)
-    if r.returncode != 0:
-        print(f"  [compress] failed; using uncompressed: {r.stderr[-300:]}", file=sys.stderr)
-        shutil.copy(intermediate, out_path)
-    print(f"  ✓ {out_path} ({out_path.stat().st_size // 1024} KB)", file=sys.stderr)
+    # 5c. Final compress (cached)
+    final_key = _cache.hash_inputs("final", intermediate, 1400, args.no_captions)
+    if use_cache and _cache.cache_check(out_path, final_key):
+        print(f"  💾 cache hit — final {out_path.stat().st_size//1024} KB reused",
+              file=sys.stderr)
+    else:
+        target_kbps = 1400
+        cmd_compress = [
+            "ffmpeg", "-y", "-i", str(intermediate),
+            "-c:v", "libx264", "-preset", "medium", "-crf", "26",
+            "-maxrate", f"{target_kbps}k", "-bufsize", f"{target_kbps*2}k",
+            "-pix_fmt", "yuv420p", "-r", "30",
+            "-c:a", "aac", "-b:a", "128k",
+            "-movflags", "+faststart",
+            str(out_path),
+        ]
+        r = subprocess.run(cmd_compress, capture_output=True, text=True)
+        if r.returncode != 0:
+            print(f"  [compress] failed; using uncompressed: {r.stderr[-300:]}",
+                  file=sys.stderr)
+            shutil.copy(intermediate, out_path)
+        if use_cache:
+            _cache.cache_save(out_path, final_key)
+        print(f"  ✓ {out_path} ({out_path.stat().st_size // 1024} KB)", file=sys.stderr)
 
     # 6. Push
     if not args.no_push:
