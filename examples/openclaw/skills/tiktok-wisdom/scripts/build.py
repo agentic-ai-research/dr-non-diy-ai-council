@@ -174,120 +174,27 @@ def gather_context(idea: str, ctx_dir: Path | None,
 
 
 # ── 2. script draft ──────────────────────────────────────────────────────
-_VOICE_PREAMBLE = """You write short-form scripts in the user's voice.
-
-Your voice is jazz: Hemingway sentences. Story → story → BANG, the point.
-You hate inspirational-poster mush. You never theorize for its own sake.
-The lift comes from seeing something specific, not from being told to feel.
-A clean punchline lands like a koan or a stand-up line — same craft, same effect.
-
-VOICE RULES — non-negotiable across all styles:
-- NO theory-first opening. Drop the reader into a SPECIFIC concrete moment —
-  a place, a person's name, a thing he did, a thing someone said.
-- Concrete nouns. Active verbs. Cut adjectives you don't need.
-- BAN these words/phrases entirely: "existential", "dance of", "in this video",
-  "let me tell you", "the truth is", "in conclusion", "ultimately",
-  "essentially", "truly", "simply put", "amidst", "navigate", "journey",
-  "embrace", "tapestry", "weave", "lens" (as a metaphor), "reflect on",
-  "delve into", "in essence". If you catch yourself writing one, rewrite.
-- Admit contradictions openly without resolving them, in PLAIN words.
-  ("I went home. I was a stranger there. Both true.")
-- No emoji, no markdown, no stage directions, no sound-effect annotations.
-"""
+# Prompts live in ../prompts/*.md so anyone can edit voice/style/persona
+# without touching code. To ship a different persona for a different user,
+# drop a new file in prompts/personas/<name>.md and pass --persona <name>.
+PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
 
-# ESSAY style — flowing monologue, story → story → BANG.
-_FORMAT_ESSAY = """
-FORMAT — ESSAY MODE:
-- 110-160 words for ~60-80 seconds.
-- Two-or-three quick scenes/anecdotes (2-4 sentences each).
-- Then ONE sharp BANG line ≤15 words that names what the scenes meant.
-- Optional 1-sentence tail that complicates or re-opens the bang.
-- No "and that's how I learned…" framing. Just the line.
-
-Output JSON ONLY:
-{
-  "title": "<5-7 word title — punchy, not lyrical>",
-  "script": "<plain prose monologue>",
-  "visual_cues": [
-     {"timestamp_pct": 0.0,  "query": "<2-5 word art search>", "art_genre": "painting|sculpture|photo"},
-     {"timestamp_pct": 0.18, "query": "...", "art_genre": "..."},
-     {"timestamp_pct": 0.36, "query": "...", "art_genre": "..."},
-     {"timestamp_pct": 0.54, "query": "...", "art_genre": "..."},
-     {"timestamp_pct": 0.72, "query": "...", "art_genre": "..."},
-     {"timestamp_pct": 0.88, "query": "...", "art_genre": "..."}
-  ]
-}
-
-Rules for visual_cues: 6 to 8 cues, evenly distributed; SHORT atmospheric
-queries (2-5 words) — "Bangkok monsoon", "solitary man balcony" — not literal.
-"""
+def _load_prompt(name: str, fallback: str = "") -> str:
+    """Load a prompt file from ../prompts/. Return fallback on miss."""
+    p = PROMPTS_DIR / name
+    if p.exists():
+        return p.read_text(encoding="utf-8")
+    return fallback
 
 
-# LISTICLE style — "Three lessons", "Three ways", numbered with stories.
-_FORMAT_LISTICLE = """
-FORMAT — LISTICLE MODE (TikTok-native):
-You are writing a numbered wisdom list. People watch listicles to find out
-"what's #2, what's #3" — that retention loop is the whole game.
-
-Structure (155-200 words, ~70-90 s):
-1. HOOK (≤2 sentences, ~5 s): Name the list. The sharper, the better.
-   GOOD: "Three lessons I learned the hard way about money."
-   GOOD: "Three things I wish someone told me at twenty-five."
-   GOOD: "Three ways to handle people who don't believe in you."
-   BAD:  "Today I want to share with you my three biggest insights about…"
-2. ITEM 1 — opens with "One." or "First." then a 2-3 sentence STORY (specific
-   moment, person, place) and a 1-sentence lesson distilled from it.
-3. ITEM 2 — opens with "Two." Story + lesson, same shape.
-4. ITEM 3 — opens with "Three." Story + lesson — and this lesson should be
-   the heaviest of the three. Save the best for last.
-5. KICKER (1-2 sentences): A short closer that links the three items into
-   one clean line. Not a summary. A line.
-
-Each item's story should be a real moment from the user's life or work. Pull
-from the context excerpts when they fit; invent plausibly when they don't
-(unless STRICT-SOURCE MODE is active — see below).
-
-Output JSON ONLY:
-{
-  "title": "<the list title itself, e.g. 'Three Lessons I Learned the Hard Way'>",
-  "script": "<full spoken list, plain prose, items separated by line breaks>",
-  "visual_cues": [
-     {"timestamp_pct": 0.00, "query": "<atmospheric — sets the hook>", "art_genre": "painting|sculpture|photo"},
-     {"timestamp_pct": 0.15, "query": "<for item 1 story scene>", "art_genre": "..."},
-     {"timestamp_pct": 0.30, "query": "<for item 1 lesson moment>", "art_genre": "..."},
-     {"timestamp_pct": 0.45, "query": "<for item 2 story scene>", "art_genre": "..."},
-     {"timestamp_pct": 0.60, "query": "<for item 2 lesson moment>", "art_genre": "..."},
-     {"timestamp_pct": 0.75, "query": "<for item 3 story scene>", "art_genre": "..."},
-     {"timestamp_pct": 0.88, "query": "<for the kicker>", "art_genre": "..."}
-  ]
-}
-
-Cues: 7 cues (one per beat). Atmospheric, 2-5 words each, NOT literal.
-"""
-
-
-# STRICT addendum — appended when --strict. Forbids invention.
-_STRICT_ADDENDUM = """
-STRICT-SOURCE MODE — non-negotiable when this addendum is present:
-- Every story, anecdote, name, place, date, dialogue line, or specific claim
-  in the script MUST be sourced from the BLOG: excerpts in the context.
-- DO NOT INVENT specific scenes, dates, numbers, or quotes that the blog
-  excerpts don't already contain. DO NOT invent quotes attributed to anyone.
-- Where possible, paraphrase or quote the blog content faithfully. Stay
-  within the spirit and the actual specifics of what was written.
-- You MAY: rearrange order, compress, omit, and bridge between fragments
-  with neutral connective prose ("So I learned…", "And the lesson was…"). You
-  MAY restate ideas in the existing voice.
-- You MAY use generic universal experiences plainly referenced in the blog
-  (e.g. "feeling stuck", "doubting yourself") without attaching invented
-  scenes to them.
-- If the blog excerpts don't have enough material to fill a beat, cut the
-  beat or shorten the script — DO NOT pad with invented content. Better
-  short and true than long and false.
-- Visual cues are still atmospheric and may use general queries; they
-  don't need to be sourced verbatim.
-"""
+def load_persona(name: str) -> str:
+    """Load a persona overlay from ../prompts/personas/<name>.md.
+    Returns empty string for the default 'plain' persona or any miss."""
+    p = PROMPTS_DIR / "personas" / f"{name}.md"
+    if not p.exists() or name in ("", "plain", "none"):
+        return ""
+    return p.read_text(encoding="utf-8")
 
 
 _LISTICLE_TRIGGERS = (
@@ -313,14 +220,23 @@ def detect_style(idea: str) -> str:
 
 
 def draft_script(idea: str, context: str, openai_key: str,
-                 style: str = "auto", strict: bool = False) -> dict:
+                 style: str = "auto", strict: bool = False,
+                 persona: str = "plain") -> dict:
     if style == "auto":
         style = detect_style(idea)
-    fmt = _FORMAT_LISTICLE if style == "listicle" else _FORMAT_ESSAY
-    system = _VOICE_PREAMBLE + "\n" + fmt
+    voice_preamble = _load_prompt("voice-preamble.md")
+    persona_overlay = load_persona(persona)
+    fmt_file = "style-listicle.md" if style == "listicle" else "style-essay.md"
+    fmt = _load_prompt(fmt_file)
+    system = voice_preamble
+    if persona_overlay:
+        system += "\n\n" + persona_overlay
+    system += "\n\n" + fmt
     if strict:
-        system += "\n" + _STRICT_ADDENDUM
-    print(f"  [style] {style}{' [strict]' if strict else ''}", file=sys.stderr)
+        system += "\n\n" + _load_prompt("strict-addendum.md")
+    print(f"  [style] {style}{' [strict]' if strict else ''}"
+          f"{' [persona='+persona+']' if persona and persona != 'plain' else ''}",
+          file=sys.stderr)
 
     if strict:
         usage_note = (
@@ -618,7 +534,65 @@ def _resize_within(img, max_w: int, max_h: int):
     return img.resize(new_size, 1)
 
 
-# ── 4. TTS (inline ElevenLabs call with fallback chain) ──────────────────
+# ── 4. TTS — multi-provider with free-tier first ─────────────────────────
+def _mac_say_tts(text: str, out_path: Path, voice: str = "Daniel") -> tuple[bool, str]:
+    """macOS `say` → AIFF → ffmpeg → MP3. Free, offline, no API key.
+    Available voices: `say -v ?` (Daniel, Alex, Karen, Samantha, Tom, etc.).
+    Quality is NOT comparable to ElevenLabs — this is the zero-friction
+    path so you can ship your first video in 5 minutes."""
+    if shutil.which("say") is None:
+        return False, "macOS `say` not available (Linux/Windows host)"
+    aiff = out_path.with_suffix(".aiff")
+    try:
+        r = subprocess.run(
+            ["say", "-v", voice, "-o", str(aiff), text],
+            capture_output=True, text=True, timeout=180,
+        )
+        if r.returncode != 0:
+            return False, f"say failed: {r.stderr[:300]}"
+        # Convert AIFF → MP3
+        r2 = subprocess.run(
+            ["ffmpeg", "-y", "-i", str(aiff),
+             "-c:a", "libmp3lame", "-b:a", "128k", str(out_path)],
+            capture_output=True, text=True, timeout=120,
+        )
+        aiff.unlink(missing_ok=True)
+        if r2.returncode != 0:
+            return False, f"ffmpeg AIFF→MP3 failed: {r2.stderr[-300:]}"
+        return out_path.exists(), ""
+    except Exception as e:
+        return False, str(e)[:300]
+
+
+def _openai_tts(api_key: str, voice: str, text: str, out_path: Path) -> tuple[bool, str]:
+    """OpenAI tts-1 — paid but cheap (~$0.015 / minute), 6 voices,
+    no clone setup. Voices: alloy, echo, fable, onyx, nova, shimmer."""
+    body = json.dumps({
+        "model": "tts-1",
+        "voice": voice or "onyx",
+        "input": text,
+        "response_format": "mp3",
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.openai.com/v1/audio/speech",
+        data=body, method="POST",
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            audio = r.read()
+        if len(audio) < 1024:
+            return False, f"too small ({len(audio)} bytes)"
+        out_path.write_bytes(audio)
+        return True, ""
+    except urllib.error.HTTPError as e:
+        try: err = e.read().decode("utf-8", errors="replace")
+        except Exception: err = str(e)
+        return False, err[:500]
+    except Exception as e:
+        return False, str(e)[:500]
+
+
 def _eleven_tts(api_key: str, voice_id: str, text: str, out_path: Path) -> tuple[bool, str]:
     """Single TTS attempt. Returns (ok, error_text)."""
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
@@ -652,26 +626,64 @@ def _eleven_tts(api_key: str, voice_id: str, text: str, out_path: Path) -> tuple
         return False, str(e)[:500]
 
 
-def render_tts(script_text: str, voice_id: str, out_path: Path, env: dict) -> float:
-    """Render script via ElevenLabs.  If the chosen voice returns
-    voice_not_fine_tuned, automatically falls through fallback voices.
-    Returns duration in seconds."""
-    fallbacks = [v.strip() for v in (env.get("ELEVEN_FALLBACK_VOICE_IDS") or "").split(",") if v.strip()]
-    chain = [voice_id] + [v for v in fallbacks if v != voice_id]
-    last_err: str = ""
-    for vid in chain:
-        ok, err = _eleven_tts(env["ELEVENLABS_API_KEY"], vid, script_text, out_path)
-        if ok:
-            if vid != voice_id:
-                print(f"  [tts] primary voice {voice_id[:8]} failed; "
-                      f"used fallback {vid[:8]}", file=sys.stderr)
-            break
-        last_err = err
-        if "not fine-tuned" not in err and "voice_not_fine_tuned" not in err:
-            raise RuntimeError(f"TTS failed: {err}")
-        print(f"  [tts] voice {vid[:8]} not fine-tuned — trying fallback", file=sys.stderr)
+def render_tts(script_text: str, provider: str, voice_id: str,
+               out_path: Path, env: dict) -> float:
+    """Multi-provider TTS dispatch with auto-fallback chain.
+
+    Providers (try in order, falling back on failure):
+      - 'mac-say'   → macOS `say` command. Free, offline. Default for the
+                      free-tier path. Voice = system voice name (Daniel,
+                      Alex, Karen, etc.). `say -v ?` to list.
+      - 'openai'    → OpenAI tts-1, voice = alloy|echo|fable|onyx|nova|shimmer.
+                      ~$0.015 / min. Needs OPENAI_API_KEY.
+      - 'eleven'    → ElevenLabs (paid, voice cloning). Needs
+                      ELEVENLABS_API_KEY + voice_id. Auto-falls-through
+                      ELEVEN_FALLBACK_VOICE_IDS if primary returns
+                      voice_not_fine_tuned.
+
+    Returns audio duration in seconds.
+    """
+    last_err = ""
+    if provider == "mac-say":
+        ok, err = _mac_say_tts(script_text, out_path, voice=voice_id or "Daniel")
+        if not ok:
+            last_err = err
+            raise RuntimeError(f"mac-say TTS failed: {err}")
+
+    elif provider == "openai":
+        if not env.get("OPENAI_API_KEY"):
+            raise RuntimeError("provider=openai needs OPENAI_API_KEY")
+        ok, err = _openai_tts(env["OPENAI_API_KEY"], voice_id or "onyx",
+                              script_text, out_path)
+        if not ok:
+            raise RuntimeError(f"openai TTS failed: {err}")
+
+    elif provider == "eleven":
+        if not env.get("ELEVENLABS_API_KEY"):
+            raise RuntimeError("provider=eleven needs ELEVENLABS_API_KEY")
+        if not voice_id:
+            raise RuntimeError("provider=eleven needs --voice-id or ELEVEN_VOICE_ID")
+        fallbacks = [v.strip() for v in (env.get("ELEVEN_FALLBACK_VOICE_IDS") or "").split(",") if v.strip()]
+        chain = [voice_id] + [v for v in fallbacks if v != voice_id]
+        for vid in chain:
+            ok, err = _eleven_tts(env["ELEVENLABS_API_KEY"], vid, script_text, out_path)
+            if ok:
+                if vid != voice_id:
+                    print(f"  [tts] primary voice {voice_id[:8]} failed; "
+                          f"used fallback {vid[:8]}", file=sys.stderr)
+                break
+            last_err = err
+            if "not fine-tuned" not in err and "voice_not_fine_tuned" not in err:
+                raise RuntimeError(f"eleven TTS failed: {err}")
+            print(f"  [tts] voice {vid[:8]} not fine-tuned — trying fallback",
+                  file=sys.stderr)
+        else:
+            raise RuntimeError(f"eleven TTS failed across all voices "
+                               f"({len(chain)} tried): {last_err}")
     else:
-        raise RuntimeError(f"TTS failed across all voices ({len(chain)} tried): {last_err}")
+        raise RuntimeError(f"unknown TTS provider: {provider!r}. "
+                           f"Choose: mac-say | openai | eleven")
+
     p = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
          "-of", "default=noprint_wrappers=1:nokey=1", str(out_path)],
@@ -844,6 +856,62 @@ def burn_captions(video_in: Path, video_out: Path, caption_chunks: list[str],
         raise RuntimeError(f"caption burn-in failed:\n{tail}")
 
 
+# ── 6b. HTML preview (--draft-only) ──────────────────────────────────────
+def write_preview_html(plan: dict, out_path: Path, idea: str,
+                       provider: str, voice_id: str) -> None:
+    """Write a single self-contained HTML preview of the script + cues +
+    estimated cost. Lets you iterate on the IDEA before paying for TTS."""
+    title  = plan.get("title", "Wisdom")
+    script = plan.get("script", "")
+    cues   = plan.get("visual_cues", [])
+    style  = plan.get("_style", "essay")
+    word_count = len(script.split())
+    est_seconds = word_count / 2.5  # 150 wpm
+    if provider == "eleven":
+        est_cost = max(0.10, est_seconds * 0.005)   # ~$0.30 / min
+    elif provider == "openai":
+        est_cost = (est_seconds / 60) * 0.015        # $0.015 / min
+    else:
+        est_cost = 0.0
+    est_cost += 0.005  # gpt-4o-mini drafting
+
+    cue_rows = "\n".join(
+        f"<tr><td>{c.get('timestamp_pct', 0):.2f}</td>"
+        f"<td><code>{c.get('query','')}</code></td>"
+        f"<td>{c.get('art_genre','')}</td></tr>"
+        for c in cues
+    )
+    html = f"""<!doctype html><html><head><meta charset="utf-8">
+<title>Preview — {title}</title>
+<style>
+  body {{ font: 16px/1.5 -apple-system,system-ui,sans-serif; max-width: 720px;
+         margin: 2rem auto; padding: 0 1rem; color: #222; }}
+  h1 {{ font-size: 1.4rem; margin: 0 0 .25rem; }}
+  .meta {{ color: #666; font-size: .9rem; margin-bottom: 1.5rem; }}
+  .script {{ background: #f7f7f5; padding: 1rem 1.25rem; border-left: 3px solid #888;
+             white-space: pre-wrap; }}
+  table {{ width: 100%; border-collapse: collapse; margin-top: 1rem; }}
+  td, th {{ padding: 6px 10px; border-bottom: 1px solid #eee; text-align: left; }}
+  th {{ background: #fafafa; font-weight: 600; }}
+  .cost {{ background: #fffbe5; padding: .75rem 1rem; border: 1px solid #f0e090;
+           border-radius: 4px; margin-top: 1.5rem; font-size: .9rem; }}
+  code {{ font-family: 'SF Mono', Menlo, monospace; font-size: .85rem; }}
+</style></head><body>
+<h1>{title}</h1>
+<div class="meta">style: <b>{style}</b> · ~{est_seconds:.0f}s · {word_count} words ·
+  voice: <code>{provider}/{voice_id or '(default)'}</code></div>
+<h2>Script</h2>
+<div class="script">{script}</div>
+<h2>Visual cues ({len(cues)})</h2>
+<table><tr><th>at</th><th>query</th><th>genre</th></tr>{cue_rows}</table>
+<div class="cost"><b>Estimated full-render cost:</b> ~${est_cost:.3f}
+  <br><small>(LLM draft + TTS; art and ffmpeg are free.)</small></div>
+<h2>Idea</h2>
+<div class="meta">{idea}</div>
+</body></html>"""
+    out_path.write_text(html, encoding="utf-8")
+
+
 # ── 7. Telegram push ──────────────────────────────────────────────────────
 def push_to_telegram(video_path: Path, caption: str, chats: list[int],
                      token_file: Path) -> None:
@@ -888,26 +956,49 @@ def main() -> int:
     p.add_argument("--out", help="Output .mp4 path. "
                                   "Default: ~/Brain/Council/Videos/wisdom/wisdom-NN.mp4")
     p.add_argument("--target-seconds", type=int, default=75)
+    p.add_argument("--voice-provider", choices=["mac-say", "openai", "eleven"],
+                   default="mac-say",
+                   help="TTS provider. 'mac-say' is free + offline (default). "
+                        "'openai' is ~$0.015/min. 'eleven' is ~$0.30/min with "
+                        "voice cloning.")
     p.add_argument("--voice-id", default="",
-                   help="ElevenLabs voice ID. Default: ELEVEN_VOICE_ID env.")
+                   help="Voice identifier. mac-say: system voice name "
+                        "(Daniel/Alex/Karen/etc). openai: alloy|echo|fable|"
+                        "onyx|nova|shimmer. eleven: voice_id from your "
+                        "ElevenLabs account.")
+    p.add_argument("--persona", default="plain",
+                   help="Persona overlay file (prompts/personas/<name>.md). "
+                        "Examples: plain, bangkok-architect, startup-founder.")
     p.add_argument("--style", choices=["auto", "essay", "listicle"], default="auto",
                    help="Script format. auto detects 'listicle' from idea.")
     p.add_argument("--strict", action="store_true",
                    help="STRICT-SOURCE mode: script must use only stories/quotes "
                         "from the blog corpus. No invented anecdotes, names, or "
                         "quotes. Pulls 7 longer posts into context (vs 3 short).")
+    p.add_argument("--draft-only", action="store_true",
+                   help="Draft script + cues, write an HTML preview, then STOP. "
+                        "Lets you iterate on the idea before paying for TTS+ffmpeg.")
     p.add_argument("--no-push", action="store_true", help="Skip Telegram push")
     p.add_argument("--no-captions", action="store_true", help="Skip caption burn-in")
     args = p.parse_args()
 
     env = load_env()
     if not env.get("OPENAI_API_KEY"):
-        print("ERROR: OPENAI_API_KEY missing", file=sys.stderr); return 2
-    if not env.get("ELEVENLABS_API_KEY"):
-        print("ERROR: ELEVENLABS_API_KEY missing", file=sys.stderr); return 2
-    voice_id = args.voice_id or env.get("ELEVEN_VOICE_ID", "")
-    if not voice_id:
-        print("ERROR: pass --voice-id or set ELEVEN_VOICE_ID", file=sys.stderr); return 2
+        print("ERROR: OPENAI_API_KEY missing (used for gpt-4o-mini script draft)",
+              file=sys.stderr); return 2
+    # Provider-specific validation
+    if args.voice_provider == "eleven":
+        if not env.get("ELEVENLABS_API_KEY"):
+            print("ERROR: --voice-provider=eleven needs ELEVENLABS_API_KEY",
+                  file=sys.stderr); return 2
+        voice_id = args.voice_id or env.get("ELEVEN_VOICE_ID", "")
+        if not voice_id:
+            print("ERROR: --voice-provider=eleven needs --voice-id or ELEVEN_VOICE_ID",
+                  file=sys.stderr); return 2
+    elif args.voice_provider == "openai":
+        voice_id = args.voice_id or "onyx"   # default OpenAI voice
+    else:  # mac-say
+        voice_id = args.voice_id or "Daniel"
 
     DEFAULT_OUT_DIR.mkdir(parents=True, exist_ok=True)
     if args.out:
@@ -936,7 +1027,8 @@ def main() -> int:
     # 2. Script + cues
     print("\n[2/6] Drafting script (gpt-4o-mini)…", file=sys.stderr)
     plan = draft_script(args.idea, context, env["OPENAI_API_KEY"],
-                        style=args.style, strict=args.strict)
+                        style=args.style, strict=args.strict,
+                        persona=args.persona)
     title = plan.get("title", "Wisdom")
     script = plan.get("script", "")
     cues   = plan.get("visual_cues", [])
@@ -945,6 +1037,17 @@ def main() -> int:
     print(f"  {word_count} words ({word_count/2.5:.0f} s @ 150wpm), {len(cues)} cues",
           file=sys.stderr)
     (out_path.with_suffix(".meta.json")).write_text(json.dumps(plan, indent=2))
+
+    # ── --draft-only short-circuit: write HTML preview and stop ─────────
+    if args.draft_only:
+        preview_path = out_path.with_suffix(".preview.html")
+        write_preview_html(plan, preview_path, args.idea,
+                           args.voice_provider, voice_id)
+        print(f"\n📄 preview: {preview_path}", file=sys.stderr)
+        print(f"   open it, decide if it's worth rendering, then re-run "
+              f"without --draft-only.", file=sys.stderr)
+        print(preview_path)   # stdout for capture
+        return 0
 
     # 3. Art
     print(f"\n[3/6] Fetching art for {len(cues)} cues…", file=sys.stderr)
@@ -962,9 +1065,10 @@ def main() -> int:
     print(f"  ✓ {len(art_paths)} composite images built", file=sys.stderr)
 
     # 4. TTS
-    print(f"\n[4/6] Rendering voice ({voice_id[:8]}…)…", file=sys.stderr)
+    print(f"\n[4/6] Rendering voice ({args.voice_provider}/{voice_id})…",
+          file=sys.stderr)
     audio_path = work / "voice.mp3"
-    duration = render_tts(script, voice_id, audio_path, env)
+    duration = render_tts(script, args.voice_provider, voice_id, audio_path, env)
     print(f"  ✓ {duration:.1f} s audio", file=sys.stderr)
 
     # 5. Compose video
