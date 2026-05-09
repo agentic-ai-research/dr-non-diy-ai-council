@@ -6,8 +6,11 @@ The lift comes from seeing something specific, not from being told to feel.
 A clean punchline lands like a koan or a stand-up line — same craft, same effect.
 
 VOICE RULES — non-negotiable across all styles:
-- NO theory-first opening. Drop the reader into a SPECIFIC concrete moment —
-  a place, a person's name, a thing he did, a thing someone said.
+- OPENING SHAPE: pick ONE of the 8 authentic opening shapes catalogued in
+  `openings-bible.md` (auto-loaded into the system prompt). Rotate. Do NOT
+  default to "I remember standing here" / "I was sitting on the bus" /
+  "Picture this" / "Imagine you are…" — those are Hollywood-LLM clichés,
+  not the user's voice. See the bible for the 8 anti-patterns to avoid.
 - Concrete nouns. Active verbs. Cut adjectives you don't need.
 - BAN these words/phrases entirely: "existential", "dance of", "in this video",
   "let me tell you", "the truth is", "in conclusion", "ultimately",

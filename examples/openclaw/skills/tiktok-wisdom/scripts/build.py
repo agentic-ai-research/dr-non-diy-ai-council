@@ -228,6 +228,48 @@ def load_persona(name: str) -> str:
     return p.read_text(encoding="utf-8")
 
 
+def load_storytelling_reference() -> str:
+    """Load the openings-bible + storytelling-techniques references and
+    slice out just the rules + catalogues (skip examples + meta sections
+    to keep token count manageable for the system prompt).
+
+    Forks of this skill: replace these two files with your own catalogues
+    mined from your own corpus. The structure is universal; the content
+    is yours."""
+    parts = []
+
+    bible = PROMPTS_DIR / "openings-bible.md"
+    if bible.exists():
+        text = bible.read_text(encoding="utf-8")
+        # Slice from "Pick from these 8 shapes" to "How to use this file"
+        m_start = text.find("## Pick from these 8 shapes")
+        m_end = text.find("## How to use this file")
+        if m_start >= 0 and m_end > m_start:
+            parts.append("STORYTELLING REFERENCE — opening shape catalogue:")
+            parts.append("")
+            parts.append(text[m_start:m_end].strip())
+
+    techniques = PROMPTS_DIR / "storytelling-techniques.md"
+    if techniques.exists():
+        text = techniques.read_text(encoding="utf-8")
+        m_start = text.find("## 1. The two-truth move")
+        m_end = text.find("## How to load these techniques")
+        if m_start >= 0 and m_end > m_start:
+            parts.append("")
+            parts.append("STORYTELLING TECHNIQUES (apply at least 3 in any piece):")
+            parts.append("")
+            parts.append(text[m_start:m_end].strip())
+
+    if parts:
+        parts.append("")
+        parts.append("Rotate opening shapes across consecutive pieces. Do NOT default "
+                     "to 'I remember standing here' / 'I was sitting on the bus' / "
+                     "'Picture this' — those are Hollywood-LLM clichés the bible's "
+                     "anti-patterns explicitly ban.")
+
+    return "\n".join(parts)
+
+
 _LISTICLE_TRIGGERS = (
     r"\b(three|four|five|six|seven|eight|nine|ten|3|4|5|6|7|8|9|10)\b",
     r"\b(things?|ways?|lessons?|reasons?|rules?|tips?|mistakes?|signs?|truths?|habits?)\b",
@@ -257,16 +299,20 @@ def draft_script(idea: str, context: str, openai_key: str,
         style = detect_style(idea)
     voice_preamble = _load_prompt("voice-preamble.md")
     persona_overlay = load_persona(persona)
+    storytelling = load_storytelling_reference()
     fmt_file = "style-listicle.md" if style == "listicle" else "style-essay.md"
     fmt = _load_prompt(fmt_file)
     system = voice_preamble
     if persona_overlay:
         system += "\n\n" + persona_overlay
+    if storytelling:
+        system += "\n\n" + storytelling
     system += "\n\n" + fmt
     if strict:
         system += "\n\n" + _load_prompt("strict-addendum.md")
     print(f"  [style] {style}{' [strict]' if strict else ''}"
-          f"{' [persona='+persona+']' if persona and persona != 'plain' else ''}",
+          f"{' [persona='+persona+']' if persona and persona != 'plain' else ''}"
+          f"{' [storytelling-ref:'+str(len(storytelling))+'c]' if storytelling else ''}",
           file=sys.stderr)
 
     if strict:
