@@ -1,0 +1,38 @@
+# Production-tier render with ElevenLabs voice cloning + strict-source mode.
+# This is the setup for a daily-video creator who wants every script to
+# trace back to their actual blog corpus, in their own cloned voice.
+#
+# Prerequisites:
+#   - ELEVENLABS_API_KEY set
+#   - ELEVEN_VOICE_ID set (or override voice_id below)
+#   - A blog corpus JSON at the path below (WordPress REST format)
+#
+# Usage:
+#   python3 ../scripts/build.py --config configs/elevenlabs-strict-blog.toml \
+#                                --idea "what do you do when you feel unmotivated?"
+
+voice_provider = "eleven"
+# voice_id = ""    # uncomment to override; otherwise reads ELEVEN_VOICE_ID env
+
+# Strict-source mode: model can only paraphrase your blog content, never
+# invent names/quotes/scenes. Pulls 7 longer posts (vs 3 short) into context.
+strict = true
+
+# Path to your blog corpus — JSON list of WordPress REST posts:
+# [{"title": {"rendered": "…"}, "content": {"rendered": "…"}}, …]
+blog_corpus = "~/data/myblog.json"
+
+# Optional: a folder of your own photos to use as filtered backdrops on
+# alternating cues. Skipped if path doesn't exist.
+user_photos = ["~/Pictures/me"]
+
+# Persona overlay — drops your real-life specifics into the voice. Edit
+# prompts/personas/<name>.md to ship a new one without code changes.
+persona = "bangkok-architect"
+
+# Telegram push to your DM + group. Needs TG_BOT_TOKEN_FILE, TG_DM_CHAT_ID,
+# TG_COUNCIL_CHAT_ID env vars. Set no_push=true to render-only.
+no_push = false
+
+# End-card portrait shown for 3 s at the end of every video.
+# end_photo = "~/Pictures/me/end-card.jpg"

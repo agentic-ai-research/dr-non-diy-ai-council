@@ -1,0 +1,22 @@
+# Free-tier zero-cost render — uses macOS `say` for voice (no API key needed
+# beyond OpenAI for script drafting at $0.005/render). Ship a video tonight.
+#
+# Usage:
+#   python3 ../scripts/build.py --config configs/free-tier-mac-say.toml \
+#                                --idea "your idea here"
+
+# Voice — macOS `say -v Daniel`, free, offline. Try also Alex, Karen,
+# Samantha, Tom (run `say -v ?` for the full list on your machine).
+voice_provider = "mac-say"
+voice_id = "Daniel"
+
+# Script style auto-detects (listicle for "Three lessons…", essay otherwise).
+style = "auto"
+persona = "plain"
+
+# No blog corpus — script will be a faithful but generic distillation
+# of the idea, no source citations.
+strict = false
+
+# No Telegram push by default in this config — produce the .mp4 locally.
+no_push = true

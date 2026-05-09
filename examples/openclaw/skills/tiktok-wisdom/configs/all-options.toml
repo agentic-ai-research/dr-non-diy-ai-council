@@ -1,0 +1,42 @@
+# All knobs the skill exposes — copy this and trim to what you need.
+# CLI flags override anything set here.
+#
+# Format: TOML (https://toml.io). All keys are optional.
+
+# ── idea (required, but usually passed via --idea on CLI) ──────────────
+# idea = "What do you do when you feel unmotivated?"
+
+# ── context (optional) ───────────────────────────────────────────────────
+# context     = "~/Brain/wiki"            # folder globbed for *.md/*.txt
+# blog_corpus = "~/data/myblog.json"      # WP-REST JSON list
+
+# ── photos (optional) ────────────────────────────────────────────────────
+# user_photos = ["~/Pictures/me"]         # filtered backdrops on alt cues
+
+# ── script ──────────────────────────────────────────────────────────────
+style   = "auto"      # auto | essay | listicle
+strict  = false       # only-from-blog mode (needs blog_corpus)
+persona = "plain"     # prompts/personas/<name>.md  (plain, bangkok-architect, startup-founder)
+
+# ── voice ──────────────────────────────────────────────────────────────
+voice_provider = "mac-say"   # mac-say | openai | eleven
+voice_id       = "Daniel"    # mac-say: system voice; openai: alloy/onyx/etc; eleven: voice_id
+
+# ── video ──────────────────────────────────────────────────────────────
+target_seconds = 75
+# end_photo    = "~/Pictures/me/end-card.jpg"  # 3-s end-card; empty = no end-card
+no_captions = false
+
+# ── output ──────────────────────────────────────────────────────────────
+# out = ""             # "" → auto-numbered ~/Brain/Council/Videos/wisdom/wisdom-NN.mp4
+
+# ── publish ─────────────────────────────────────────────────────────────
+no_push = true         # set false to push to Telegram (needs TG env vars)
+
+# ── cache ──────────────────────────────────────────────────────────────
+no_cache   = false     # disable cache entirely
+from_cache = ""        # invalidate from this stage onward; "" = honor full cache
+                       # stages: context|script|art|tts|video|captions|final
+
+# ── modes ──────────────────────────────────────────────────────────────
+draft_only = false     # stop after script; emit HTML preview for review
